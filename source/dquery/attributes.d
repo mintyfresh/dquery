@@ -27,6 +27,11 @@ struct DQueryAttributes(QueryType, Attributes...)
 	alias length = Alias!(Attributes.length);
 
 	@property
+	alias unique = Alias!(
+		DQueryAttributes!(QueryType, NoDuplicates!Attributes)()
+	);
+
+	@property
 	static auto allow(TList...)()
 	if(TList.length > 0)
 	{
