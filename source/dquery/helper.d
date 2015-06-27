@@ -8,6 +8,14 @@ alias GetMember(Type, string Name) = Alias!(
 	__traits(getMember, Type, Name)
 );
 
+alias GetAttributes(alias Target) = Alias!(
+	__traits(getAttributes, Target)
+);
+
+alias GetAttributes(Type, string Name) = Alias!(
+	__traits(getAttributes, __traits(getMember, Type, Name))
+);
+
 /++
  + Returns a template predicate from a unary function.
  ++/
