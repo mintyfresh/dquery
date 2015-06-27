@@ -131,7 +131,14 @@ template map(alias Pred)
 {
 	@property
 	auto map(QueryType, QueryElements...)(DQuery!(QueryType, QueryElements) query)
-	if(__traits(compiles, {
+	if(QueryElements.length == 0)
+	{
+		return query;
+	}
+
+	@property
+	auto map(QueryType, QueryElements...)(DQuery!(QueryType, QueryElements) query)
+	if(QueryElements.length > 0 && __traits(compiles, {
 		return DQuery!(QueryType, staticMap!(UnaryToPred!Pred, QueryElements))();
 	}))
 	{
@@ -140,7 +147,7 @@ template map(alias Pred)
 
 	@property
 	auto map(QueryType, QueryElements...)(DQuery!(QueryType, QueryElements) query)
-	if(__traits(compiles, {
+	if(QueryElements.length > 0 && __traits(compiles, {
 		return DQuery!(QueryType, staticMap!(Pred, QueryElements))();
 	}))
 	{
@@ -152,7 +159,14 @@ template filter(alias Pred)
 {
 	@property
 	auto filter(QueryType, QueryElements...)(DQuery!(QueryType, QueryElements) query)
-	if(__traits(compiles, {
+	if(QueryElements.length == 0)
+	{
+		return query;
+	}
+
+	@property
+	auto filter(QueryType, QueryElements...)(DQuery!(QueryType, QueryElements) query)
+	if(QueryElements.length > 0 && __traits(compiles, {
 		return DQuery!(QueryType, Filter!(UnaryToPred!Pred, QueryElements))();
 	}))
 	{
@@ -161,7 +175,7 @@ template filter(alias Pred)
 
 	@property
 	auto filter(QueryType, QueryElements...)(DQuery!(QueryType, QueryElements) query)
-	if(__traits(compiles, {
+	if(QueryElements.length > 0 && __traits(compiles, {
 		return DQuery!(QueryType, Filter!(Pred, QueryElements))();
 	}))
 	{
