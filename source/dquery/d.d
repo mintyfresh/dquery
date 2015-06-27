@@ -11,17 +11,9 @@ public import dquery.query;
 
 auto query(QueryType)()
 {
-	template MapToElement(string Name)
-	{
-		auto MapToElementImpl()
-		{
-			DQueryElement!(QueryType, Name) element = void;
-			return element;
-		}
+	alias MapToElement(string Name) = Alias!(
+		DQueryElement!(QueryType, Name)()
+	);
 
-		alias MapToElement = Alias!(MapToElementImpl());
-	}
-
-	DQuery!(QueryType, __traits(allMembers, QueryType)) query = void;
-	return query.map!MapToElement;
+	return DQuery!(QueryType, staticMap!(MapToElement, __traits(allMembers, QueryType)))();
 }

@@ -41,6 +41,9 @@ struct DQueryElement(QueryType, string Name)
 		)()
 	);
 
+	/++
+	 + Property that returns true if the element 
+	 ++/
 	@property
 	alias hasAttribute(Type) = Alias!(
 		attributes.allow!Type.length > 0
@@ -55,7 +58,7 @@ struct DQueryElement(QueryType, string Name)
 	);
 
 	/++
-	 + Property that returns true if the element refers to a function.
+	 + Property that returns true if the element refers to a field.
 	 ++/
 	@property
 	alias isField = Alias!(
@@ -63,7 +66,8 @@ struct DQueryElement(QueryType, string Name)
 	);
 
 	/++
-	 + Property that returns true if the element's type is an exact match.
+	 + Property that returns true if a given type matches the element's
+	 + type exactly.
 	 ++/
 	@property
 	alias isTypeOf(Type) = Alias!(
@@ -72,6 +76,10 @@ struct DQueryElement(QueryType, string Name)
 		})
 	);
 
+	/++
+	 + Property that returns true if a given type can be assigned to a
+	 + variable of the element's type.
+	 ++/
 	@property
 	alias isTypeAssignableTo(Type) = Alias!(
 		__traits(compiles, {
@@ -80,6 +88,10 @@ struct DQueryElement(QueryType, string Name)
 		})
 	);
 
+	/++
+	 + Property that returns true if a given type can be assigned from a
+	 + variable of the element's type.
+	 ++/
 	@property
 	alias isTypeAssignableFrom(Type) = Alias!(
 		__traits(compiles, {
@@ -88,11 +100,18 @@ struct DQueryElement(QueryType, string Name)
 		})
 	);
 
+	/++
+	 + Property that returns true if the element refers to a function.
+	 ++/
 	@property
 	alias isFunction = Alias!(
 		is(typeof(GetMember!(QueryType, Name)) == function)
 	);
 
+	/++
+	 + Property that return true if the element's arity matches the given
+	 + number of parameters.
+	 ++/
 	@property
 	alias isArity(int Count) = Alias!(
 		__traits(compiles, {
@@ -100,13 +119,44 @@ struct DQueryElement(QueryType, string Name)
 		})
 	);
 
+	/++
+	 + Property that returns true if a given type matches the element's
+	 + return type exactly.
+	 ++/
 	@property
-	alias isReturnType(Type) = Alias!(
+	alias isReturnTypeOf(Type) = Alias!(
 		__traits(compiles, {
 			static assert(is(ReturnType!(GetMember!(QueryType, Name)) == Type));
 		})
 	);
 
+	/++
+	 + Property that returns true if a given type can be assigned to a
+	 + variable of the element's return type.
+	 ++/
+	@property
+	alias isReturnAssignableTo(Type) = Alias!(
+		__traits(compiles, {
+			ReturnType!(GetMember!(QueryType, Name)) t1 = void;
+			Type t2 = t1;
+		})
+	);
+
+	/++
+	 + Property that returns true if a given type can be assigned from a
+	 + variable of the element's return type.
+	 ++/
+	@property
+	alias isReturnAssignableFrom(Type) = Alias!(
+		__traits(compiles, {
+			Type t1 = void;
+			ReturnType!(GetMember!(QueryType, Name)) t2 = t1;
+		})
+	);
+
+	/++
+	 + Property that returns true if the element refers to an aggregate type.
+	 ++/
 	@property
 	alias isAggregate = Alias!(
 		__traits(compiles, {
@@ -114,6 +164,44 @@ struct DQueryElement(QueryType, string Name)
 		})
 	);
 
+	/++
+	 + Property that returns true if a given type matches the element's
+	 + aggregate type exactly.
+	 ++/
+	@property
+	alias isAggregateTypeOf(Type) = Alias!(
+		__traits(compiles, {
+			static assert(is(GetMember!(QueryType, Name) == Type));
+		})
+	);
+
+	/++
+	 + Property that returns true if a given type can be assigned to a
+	 + variable of the element's aggregate type.
+	 ++/
+	@property
+	alias isAggregateAssignableTo(Type) = Alias!(
+		__traits(compiles, {
+			GetMember!(QueryType, Name) t1 = void;
+			Type t2 = t1;
+		})
+	);
+
+	/++
+	 + Property that returns true if a given type can be assigned from a
+	 + variable of the element's aggregate type.
+	 ++/
+	@property
+	alias isAggregateAssignableFrom(Type) = Alias!(
+		__traits(compiles, {
+			Type t1 = void;
+			GetMember!(QueryType, Name) t2 = t1;
+		})
+	);
+
+	/++
+	 + Property that returns true if the element refers to a class.
+	 ++/
 	@property
 	alias isClass = Alias!(
 		__traits(compiles, {
@@ -122,6 +210,9 @@ struct DQueryElement(QueryType, string Name)
 		})
 	);
 
+	/++
+	 + Property that returns true if the element refers to a struct.
+	 ++/
 	@property
 	alias isStruct = Alias!(
 		__traits(compiles, {
