@@ -86,4 +86,9 @@ struct DQueryAttribute(alias Attribute)
 		return attribute;
 	}
 
+	string toString()
+	{
+		return Attribute.stringof;
+	}
+
 }

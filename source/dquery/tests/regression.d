@@ -3,58 +3,68 @@ module dquery.tests.regression;
 
 import dquery.d;
 
-struct Attr
+version(unittest)
 {
-}
-
-struct Limit
-{
-	int value;
-}
-
-struct None
-{
-}
-
-struct Coord
-{
-
-	@Attr
-	@Limit(10)
-	int x;
-
-	@Attr
-	@Limit(10)
-	int y;
-
-	@Attr
-	@Limit(10)
-	int z;
-
-	int tmp;
-
-	this(int x, int y, int z)
+	struct Coord
 	{
-		this.x = x;
-		this.y = y;
-		this.z = z;
-	}
 
-	int[3] getCoords()
-	{
-		return [x, y, z];
+		private
+		{
+			struct Attr
+			{
+			}
+
+			struct Limit
+			{
+				int value;
+			}
+
+			struct None
+			{
+			}
+		}
+
+		@Attr
+		@Limit(10)
+		int x;
+
+		@Attr
+		@Limit(10)
+		int y;
+
+		@Attr
+		@Limit(10)
+		int z;
+
+		int tmp;
+
+		this(int x, int y, int z)
+		{
+			this.x = x;
+			this.y = y;
+			this.z = z;
+		}
+
+		int[3] getCoords()
+		{
+			return [x, y, z];
+		}
 	}
 }
 
 unittest
 {
+	alias Attr = Coord.Attr;
+	alias Limit = Coord.Limit;
+	alias None = Coord.None;
+
 	auto query = query!Coord;
 
 	// Should not be empty.
 	static assert(!query.empty);
 
-	// Should have 6 elements.
-	static assert(query.length == 6);
+	// Should have 9 elements.
+	static assert(query.length == 9);
 
 	auto fields = query.fields;
 
@@ -191,15 +201,11 @@ unittest
 		// Should not be a function.
 		static assert(!element.isFunction);
 
-		// Should compile but not have arity 0.
-		static assert(__traits(compiles, {
-			static assert(!element.isArity!0);
-		}));
+		// Should not have arity 0.
+		static assert(!element.isArity!0);
 
-		// Should compile but not return an int.
-		static assert(__traits(compiles, {
-			static assert(!element.isReturnTypeOf!int);
-		}));
+		// Should not return an int.
+		static assert(!element.isReturnTypeOf!int);
 
 		// Should not be an aggregate.
 		static assert(!element.isAggregate);
@@ -340,47 +346,49 @@ unittest
 
 		static if(element.name == "__ctor")
 		{
-			// Should compile and have arity 3.
-			static assert(__traits(compiles, {
-				static assert(!element.isArity!3);
-			}));
+			// Should not have arity 0.
+			static assert(!element.isArity!0);
+			
+			// Should have arity 3.
+			static assert(element.isArity!3);
+
+			// Should not have parameters ().
+			static assert(!element.isParameterTypesOf!());
+
+			// Should not have parameters (int).
+			static assert(!element.isParameterTypesOf!(int));
+
+			// Should have parameters (int, int, int).
+			static assert(element.isParameterTypesOf!(int, int, int));
+
+			// Should not return an int.
+			static assert(!element.isReturnTypeOf!int);
+
+			// Should return a Coord.
+			static assert(element.isReturnTypeOf!Coord);
 		}
 		else static if(element.name == "getCoords")
 		{
-			// Should compile and have arity 0.
-			static assert(__traits(compiles, {
-				static assert(!element.isArity!0);
-			}));
-		}
-		else
-		{
-			// Should not have any other elements.
-			static assert(0, "Unexpected element " ~ element.name);
-		}
+			// Should have arity 0.
+			static assert(element.isArity!0);
+			
+			// Should not have arity 3.
+			static assert(!element.isArity!3);
 
-		static if(element.name == "__ctor")
-		{
-			// Should compile but not return an int.
-			static assert(__traits(compiles, {
-				static assert(!element.isReturnTypeOf!int);
-			}));
+			// Should have parameters ().
+			static assert(element.isParameterTypesOf!());
 
-			// Should compile but and return a Coord.
-			static assert(__traits(compiles, {
-				static assert(element.isReturnTypeOf!Coord);
-			}));
-		}
-		else static if(element.name == "getCoords")
-		{
-			// Should compile but not return an int.
-			static assert(__traits(compiles, {
-				static assert(!element.isReturnTypeOf!int);
-			}));
+			// Should not have parameters (int).
+			static assert(!element.isParameterTypesOf!(int));
 
-			// Should compile but and return an int array.
-			static assert(__traits(compiles, {
-				static assert(element.isReturnTypeOf!(int[3]));
-			}));
+			// Should not have parameters (int, int, int).
+			static assert(!element.isParameterTypesOf!(int, int, int));
+
+			// Should not return an int.
+			static assert(!element.isReturnTypeOf!int);
+
+			// Should return an int array.
+			static assert(element.isReturnTypeOf!(int[3]));
 		}
 		else
 		{
@@ -400,6 +408,94 @@ unittest
 
 	auto aggregates = query.aggregates;
 
-	// Should be empty.
-	static assert(aggregates.empty);
+	// Should not be empty.
+	static assert(!aggregates.empty);
+
+	// Should have 3 elements.
+	static assert(aggregates.length == 3);
+
+	foreach(element; aggregates)
+	{
+		// Should match parent type.
+		static assert(is(element.type == aggregates.type));
+
+		// Should not have attribute Attr.
+		static assert(!element.hasAttribute!Attr);
+
+		// Should not have attribute Limit.
+		static assert(!element.hasAttribute!Limit);
+
+		// Should not have attribute None.
+		static assert(!element.hasAttribute!None);
+
+		// Should not have nonexistent elements.
+		static assert(element.attributes.allow!None.empty);
+
+		// Should not have forbidden elements.
+		static assert(element.attributes.forbid!(Attr, Limit).empty);
+
+		// Should have private protection.
+		static assert(element.protection == "private");
+
+		// Should not be a field.
+		static assert(!element.isField);
+
+		// Should be an int.
+		static assert(!element.isTypeOf!int);
+
+		// Should be not a ulong.
+		static assert(!element.isTypeOf!ulong);
+
+		// Should be assignable to int.
+		static assert(!element.isTypeAssignableTo!int);
+
+		// Should be assignable to ulong.
+		static assert(!element.isTypeAssignableTo!ulong);
+
+		// Should be assignable from int.
+		static assert(!element.isTypeAssignableFrom!int);
+
+		// Should not be assignable from ulong.
+		static assert(!element.isTypeAssignableFrom!ulong);
+
+		// Should not be a function.
+		static assert(!element.isFunction);
+
+		// Should not have arity 0.
+		static assert(!element.isArity!0);
+
+		// Should not return an int.
+		static assert(!element.isReturnTypeOf!int);
+
+		// Should not return void.
+		static assert(!element.isReturnTypeOf!void);
+
+		// Should be an aggregate.
+		static assert(element.isAggregate);
+
+		// Should not be a class.
+		static assert(!element.isClass);
+
+		// Should be a struct.
+		static assert(element.isStruct);
+
+		auto subQuery = element.query;
+
+		// Should not match parent type.
+		static assert(!is(subQuery.type == element.type));
+
+		static if(is(subQuery.type == Limit))
+		{
+			// Should not be empty.
+			static assert(!subQuery.empty);
+
+			// Should have 1 element.
+			static assert(subQuery.length == 1);
+		}
+		else
+		{
+			// Should be empty.
+			static assert(subQuery.empty);
+		}
+	}
 }

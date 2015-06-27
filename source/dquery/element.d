@@ -54,7 +54,7 @@ struct DQueryElement(QueryType, string Name)
 	 ++/
 	@property
 	alias protection = Alias!(
-		__traits(getProtection, GetMember!(QueryType, Name))
+		GetProtection!(QueryType, Name)
 	);
 
 	/++
@@ -100,6 +100,13 @@ struct DQueryElement(QueryType, string Name)
 		})
 	);
 
+	@property
+	alias isTemplateOf(Type) = Alias!(
+		__traits(compiles, {
+			static assert(is(TemplateOf!(GetMember!(QueryType, Name)) == Type));
+		})
+	);
+
 	/++
 	 + Property that returns true if the element refers to a function.
 	 ++/
@@ -115,7 +122,7 @@ struct DQueryElement(QueryType, string Name)
 	@property
 	alias isArity(int Count) = Alias!(
 		__traits(compiles, {
-			static assert(arity!(GetMember!(QueryType, Name) == Count));
+			static assert(arity!(GetMember!(QueryType, Name)) == Count);
 		})
 	);
 
@@ -151,6 +158,16 @@ struct DQueryElement(QueryType, string Name)
 		__traits(compiles, {
 			Type t1 = void;
 			ReturnType!(GetMember!(QueryType, Name)) t2 = t1;
+		})
+	);
+
+	@property
+	alias isParameterTypesOf(TList...) = Alias!(
+		__traits(compiles, {
+			static assert(
+				Compare!(ParameterTypeTuple!(GetMember!(QueryType, Name)))
+				.With!(TList)
+			);
 		})
 	);
 
@@ -220,6 +237,22 @@ struct DQueryElement(QueryType, string Name)
 			static assert(is(Element == struct));
 		})
 	);
+
+	@property
+	static auto query()()
+	if(isAggregate)
+	{
+		import dquery.query;
+
+		alias NewType = GetMember!(QueryType, Name);
+		enum NewElements = __traits(allMembers, NewType);
+
+		alias MapToElement(string Name) = Alias!(
+			DQueryElement!(NewType, Name)()
+		);
+
+		return DQuery!(NewType, staticMap!(MapToElement, NewElements))();
+	}
 
 	@property
 	static auto opCall()

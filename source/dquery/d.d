@@ -15,5 +15,6 @@ auto query(QueryType)()
 		DQueryElement!(QueryType, Name)()
 	);
 
-	return DQuery!(QueryType, staticMap!(MapToElement, __traits(allMembers, QueryType)))();
+	enum Elements = __traits(allMembers, QueryType);
+	return DQuery!(QueryType, staticMap!(MapToElement, Elements))();
 }
