@@ -4,7 +4,13 @@ module dquery.element;
 import std.traits;
 import std.typetuple;
 
+import dquery.attribute;
+import dquery.attributes;
 import dquery.helper;
+
+alias MapToAttribute(alias Attribute) = Alias!(
+	DQueryAttribute!Attribute()
+);
 
 struct DQueryElement(QueryType, string Name)
 {
@@ -20,6 +26,20 @@ struct DQueryElement(QueryType, string Name)
 	 ++/
 	@property
 	alias name = Name;
+
+	/++
+	 + Property that returns the element's attributes.
+	 ++/
+	@property
+	alias attributes = Alias!(
+		DQueryAttributes!(
+			QueryType,
+			staticMap!(
+				MapToAttribute,
+				GetAttributes!(QueryType, Name)
+			)
+		)()
+	);
 
 	/++
 	 + Property that returns the element's access protection.
@@ -104,5 +124,12 @@ struct DQueryElement(QueryType, string Name)
 			static assert(is(Element == struct));
 		})
 	);
+
+	@property
+	static auto opCall()
+	{
+		DQueryElement!(QueryType, Name) element = void;
+		return element;
+	}
 
 }

@@ -1,6 +1,8 @@
 
 module dquery.attribute;
 
+import std.typetuple;
+
 struct DQueryAttribute(alias Attribute)
 {
 
@@ -39,5 +41,12 @@ struct DQueryAttribute(alias Attribute)
 			type t2 = t1;
 		})
 	);
+
+	@property
+	static auto opCall()
+	{
+		DQueryAttribute!(Attribute) attribute = void;
+		return attribute;
+	}
 
 }
