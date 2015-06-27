@@ -1,0 +1,19 @@
+{
+	"name": "dquery",
+  "license": "MIT",
+	"description": "A neat little wrapper for convinient traits in D.",
+	"copyright": "Copyright © 2015, Mihail-K",
+	"authors": [
+    "Mihail K."
+  ],
+  "configurations": [
+    {
+      "name": "demo",
+      "targetType": "executable"
+    },
+    {
+      "name": "library",
+      "targetType": "library"
+    }
+  ]
+}
