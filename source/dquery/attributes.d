@@ -17,20 +17,37 @@ struct DQueryAttributes(QueryType, Attributes...)
 	@property
 	alias type = QueryType;
 
+	/++
+	 + Property that returns the list of attributes.
+	 ++/
 	@property
 	alias attributes = Attributes;
 
+	/++
+	 + Property that returns true if the list of attributes is empty.
+	 ++/
 	@property
 	alias empty = Alias!(length == 0);
 
+	/++
+	 + Property that returns the number of attributes.
+	 ++/
 	@property
 	alias length = Alias!(Attributes.length);
 
+	/++
+	 + Proprety that returns a transformed list of attributes with
+	 + all duplicateds removed.
+	 ++/
 	@property
 	alias unique = Alias!(
 		DQueryAttributes!(QueryType, NoDuplicates!Attributes)()
 	);
 
+	/++
+	 + Property that returns a subset of the list of attributes
+	 + which match at least one of the given types.
+	 ++/
 	@property
 	static auto allow(TList...)()
 	if(TList.length > 0)
@@ -52,6 +69,10 @@ struct DQueryAttributes(QueryType, Attributes...)
 		}
 	}
 
+	/++
+	 + Property that returns a subset of the list of attributes
+	 + which match none of the given types.
+	 ++/
 	@property
 	static auto forbid(TList...)()
 	if(TList.length > 0)

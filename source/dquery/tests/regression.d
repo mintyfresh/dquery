@@ -198,7 +198,7 @@ unittest
 
 		// Should compile but not return an int.
 		static assert(__traits(compiles, {
-			static assert(!element.isReturnType!int);
+			static assert(!element.isReturnTypeOf!int);
 		}));
 
 		// Should not be an aggregate.
@@ -362,24 +362,24 @@ unittest
 		{
 			// Should compile but not return an int.
 			static assert(__traits(compiles, {
-				static assert(!element.isReturnType!int);
+				static assert(!element.isReturnTypeOf!int);
 			}));
 
 			// Should compile but and return a Coord.
 			static assert(__traits(compiles, {
-				static assert(element.isReturnType!Coord);
+				static assert(element.isReturnTypeOf!Coord);
 			}));
 		}
 		else static if(element.name == "getCoords")
 		{
 			// Should compile but not return an int.
 			static assert(__traits(compiles, {
-				static assert(!element.isReturnType!int);
+				static assert(!element.isReturnTypeOf!int);
 			}));
 
 			// Should compile but and return an int array.
 			static assert(__traits(compiles, {
-				static assert(element.isReturnType!(int[3]));
+				static assert(element.isReturnTypeOf!(int[3]));
 			}));
 		}
 		else
