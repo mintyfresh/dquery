@@ -9,33 +9,63 @@ import dquery.helper;
 struct DQueryAttributes(QueryType, Attributes...)
 {
 
+	alias attributes this;
+
 	/++
 	 + Property that returns the type being queried.
 	 ++/
 	@property
-	alias queryType = QueryType;
+	alias type = QueryType;
 
 	@property
 	alias attributes = Attributes;
 
 	@property
-	auto allow(TList...)()
+	alias empty = Alias!(length == 0);
+
+	@property
+	alias length = Alias!(Attributes.length);
+
+	@property
+	static auto allow(TList...)()
+	if(TList.length > 0)
 	{
 		alias AllowFilter(Type) = Alias!(
 			UnaryToPred!(attribute => attribute.isTypeOf!Type)
 		);
 
-		return this.filter!(templateOr!(staticMap!(AllowFilter, TList)));
+		DQueryAttributes!(QueryType, Attributes) query = void;
+
+		static if(Attributes.length > 0)
+		{
+			alias Pred = templateOr!(staticMap!(AllowFilter, TList));
+			return query.filter!Pred;
+		}
+		else
+		{
+			return query;
+		}
 	}
 
 	@property
-	auto forbid(TList...)()
+	static auto forbid(TList...)()
+	if(TList.length > 0)
 	{
 		alias ForbidFilter(Type) = Alias!(
 			UnaryToPred!(attribute => !attribute.isTypeOf!Type)
 		);
 
-		return this.filter!(templateAnd!(staticMap!(ForbidFilter, TList)));
+		DQueryAttributes!(QueryType, Attributes) query = void;
+
+		static if(Attributes.length > 0)
+		{
+			alias Pred = templateAnd!(staticMap!(ForbidFilter, TList));
+			return query.filter!Pred;
+		}
+		else
+		{
+			return query;
+		}
 	}
 
 	@property

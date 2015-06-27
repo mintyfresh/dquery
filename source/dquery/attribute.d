@@ -10,7 +10,7 @@ struct DQueryAttribute(alias Attribute)
 	alias attribute = Attribute;
 
 	// Determine how to get the type.
-	static if(is(typeof(Attribute)))
+	static if(isExpression)
 	{
 		@property
 		alias type = typeof(Attribute);
@@ -20,6 +20,16 @@ struct DQueryAttribute(alias Attribute)
 		@property
 		alias type = Attribute;
 	}
+
+	@property
+	alias isType = Alias!(
+		!is(typeof(Attribute))
+	);
+
+	@property
+	alias isExpression = Alias!(
+		is(typeof(Attribute))
+	);
 
 	@property
 	alias isTypeOf(Type) = Alias!(
@@ -35,7 +45,7 @@ struct DQueryAttribute(alias Attribute)
 	);
 
 	@property
-	alias isTypeAssignableTo(Type) = Alias!(
+	alias isTypeAssignableFrom(Type) = Alias!(
 		__traits(compiles, {
 			Type t1 = void;
 			type t2 = t1;

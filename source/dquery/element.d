@@ -19,7 +19,7 @@ struct DQueryElement(QueryType, string Name)
 	 + Property that returns the type being queried.
 	 ++/
 	@property
-	alias queryType = QueryType;
+	alias type = QueryType;
 
 	/++
 	 + Property that returns the name of the element.
@@ -39,6 +39,11 @@ struct DQueryElement(QueryType, string Name)
 				GetAttributes!(QueryType, Name)
 			)
 		)()
+	);
+
+	@property
+	alias hasAttribute(Type) = Alias!(
+		attributes.allow!Type.length > 0
 	);
 
 	/++

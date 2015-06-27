@@ -10,17 +10,19 @@ import dquery.helper;
 struct DQuery(QueryType, QueryElements...)
 {
 
+	alias elements this;
+
 	/++
 	 + Property that returns the type being queried.
 	 ++/
 	@property
-	alias queryType = QueryType;
+	alias type = QueryType;
 
 	/++
 	 + Property that returns the elements in the query.
 	 ++/
 	@property
-	alias queryElements = QueryElements;
+	alias elements = QueryElements;
 
 	/++
 	 + Property that returns true if the query has no elements.
@@ -32,7 +34,7 @@ struct DQuery(QueryType, QueryElements...)
 	 + Property that returns the number of elements in the query.
 	 ++/
 	@property
-	alias length = Alias!(queryElements.length);
+	alias length = Alias!(elements.length);
 
 	/++
 	 + Hidden constructor. No touchie.
