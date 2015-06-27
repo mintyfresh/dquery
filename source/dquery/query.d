@@ -65,23 +65,6 @@ struct DQuery(QueryType, QueryElements...)
 
 }
 
-auto query(QueryType)()
-{
-	template MapToElement(string Name)
-	{
-		auto MapToElementImpl()
-		{
-			DQueryElement!(QueryType, Name) element = void;
-			return element;
-		}
-
-		alias MapToElement = Alias!(MapToElementImpl());
-	}
-
-	DQuery!(QueryType, __traits(allMembers, QueryType)) query = void;
-	return query.map!MapToElement;
-}
-
 template map(alias Pred)
 {
 	@property
