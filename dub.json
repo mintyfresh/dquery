@@ -1,7 +1,7 @@
 {
 	"name": "dquery",
   "license": "MIT",
-	"description": "A neat little wrapper for convinient traits in D.",
+	"description": "A neat little wrapper for convenient type information in D.",
 	"copyright": "Copyright © 2015, Mihail-K",
 	"authors": [
     "Mihail K."
