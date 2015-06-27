@@ -31,6 +31,8 @@ struct Coord
 	@Limit(10)
 	int z;
 
+	int tmp;
+
 	this(int x, int y, int z)
 	{
 		this.x = x;
@@ -51,8 +53,8 @@ unittest
 	// Should not be empty.
 	static assert(!query.empty);
 
-	// Should have 5 elements.
-	static assert(query.length == 5);
+	// Should have 6 elements.
+	static assert(query.length == 6);
 
 	auto fields = query.fields;
 
@@ -62,81 +64,104 @@ unittest
 	// Should not be empty.
 	static assert(!fields.empty);
 
-	// Should have 3 elements.
-	static assert(fields.length == 3);
+	// Should have 4 elements.
+	static assert(fields.length == 4);
 
 	foreach(element; fields)
 	{
 		// Should match parent type.
 		static assert(is(element.type == fields.type));
 
-		// Should have attribute Attr.
-		static assert(element.hasAttribute!Attr);
-
-		// Should have attribute Limit.
-		static assert(element.hasAttribute!Limit);
-
-		// Should not have attribute None.
-		static assert(!element.hasAttribute!None);
-
-		// Should not have nonexistent elements.
-		static assert(element.attributes.allow!None.empty);
-
-		// Should not have forbidden elements.
-		static assert(element.attributes.forbid!(Attr, Limit).empty);
-
-		foreach(attribute; element.attributes.allow!Attr)
+		static if(element.name != "tmp")
 		{
-			// Should be a type attribute.
-			static assert(attribute.isType);
+			// Should have attribute Attr.
+			static assert(element.hasAttribute!Attr);
 
-			// Should not be an expression attribute.
-			static assert(!attribute.isExpression);
+			// Should have attribute Limit.
+			static assert(element.hasAttribute!Limit);
 
-			// Should be type Attr.
-			static assert(attribute.isTypeOf!Attr);
+			// Should not have attribute None.
+			static assert(!element.hasAttribute!None);
 
-			// Should not be type None.
-			static assert(!attribute.isTypeOf!None);
+			// Should not have nonexistent elements.
+			static assert(element.attributes.allow!None.empty);
 
-			// Should be assignable to Attr.
-			static assert(attribute.isTypeAssignableTo!Attr);
+			// Should not have forbidden elements.
+			static assert(element.attributes.forbid!(Attr, Limit).empty);
 
-			// Should not be assignable to None.
-			static assert(!attribute.isTypeAssignableTo!None);
+			foreach(attribute; element.attributes.allow!Attr)
+			{
+				// Should be a type attribute.
+				static assert(attribute.isType);
 
-			// Should be assignable from Attr.
-			static assert(attribute.isTypeAssignableFrom!Attr);
+				// Should not be an expression attribute.
+				static assert(!attribute.isExpression);
 
-			// Should not be assignable from None.
-			static assert(!attribute.isTypeAssignableFrom!None);
+				// Should be type Attr.
+				static assert(attribute.isTypeOf!Attr);
+
+				// Should not be type None.
+				static assert(!attribute.isTypeOf!None);
+
+				// Should be assignable to Attr.
+				static assert(attribute.isTypeAssignableTo!Attr);
+
+				// Should not be assignable to None.
+				static assert(!attribute.isTypeAssignableTo!None);
+
+				// Should be assignable from Attr.
+				static assert(attribute.isTypeAssignableFrom!Attr);
+
+				// Should not be assignable from None.
+				static assert(!attribute.isTypeAssignableFrom!None);
+			}
+
+			foreach(attribute; element.attributes.allow!Limit)
+			{
+				// Should be a type attribute.
+				static assert(!attribute.isType);
+
+				// Should not be an expression attribute.
+				static assert(attribute.isExpression);
+
+				// Should be type Limit.
+				static assert(attribute.isTypeOf!Limit);
+
+				// Should not be type None.
+				static assert(!attribute.isTypeOf!None);
+
+				// Should be assignable to Limit.
+				static assert(attribute.isTypeAssignableTo!Limit);
+
+				// Should not be assignable to None.
+				static assert(!attribute.isTypeAssignableTo!None);
+
+				// Should be assignable from Limit.
+				static assert(attribute.isTypeAssignableFrom!Limit);
+
+				// Should not be assignable from None.
+				static assert(!attribute.isTypeAssignableFrom!None);
+			}
 		}
-
-		foreach(attribute; element.attributes.allow!Limit)
+		else
 		{
-			// Should be a type attribute.
-			static assert(!attribute.isType);
+			// Should not have attribute Attr.
+			static assert(!element.hasAttribute!Attr);
 
-			// Should not be an expression attribute.
-			static assert(attribute.isExpression);
+			// Should not have attribute Limit.
+			static assert(!element.hasAttribute!Limit);
 
-			// Should be type Limit.
-			static assert(attribute.isTypeOf!Limit);
+			// Should not have attribute None.
+			static assert(!element.hasAttribute!None);
 
-			// Should not be type None.
-			static assert(!attribute.isTypeOf!None);
+			// Should not have nonexistent elements.
+			static assert(element.attributes.allow!None.empty);
 
-			// Should be assignable to Limit.
-			static assert(attribute.isTypeAssignableTo!Limit);
+			// Should not have allowed but nonexistent elements.
+			static assert(element.attributes.allow!(Attr, Limit).empty);
 
-			// Should not be assignable to None.
-			static assert(!attribute.isTypeAssignableTo!None);
-
-			// Should be assignable from Limit.
-			static assert(attribute.isTypeAssignableFrom!Limit);
-
-			// Should not be assignable from None.
-			static assert(!attribute.isTypeAssignableFrom!None);
+			// Should not have forbidden elements.
+			static assert(element.attributes.forbid!(Attr, Limit).empty);
 		}
 
 		// Should have public protection.
@@ -184,6 +209,78 @@ unittest
 
 		// Should not be a struct.
 		static assert(!element.isStruct);
+	}
+
+	auto namedFields = fields.names!("x", "z");
+
+	// Should match parent type.
+	static assert(is(namedFields.type == fields.type));
+
+	// Should not be empty.
+	static assert(!namedFields.empty);
+
+	// Should have 2 elements.
+	static assert(namedFields.length == 2);
+
+	foreach(element; namedFields)
+	{
+		// Should match parent type.
+		static assert(is(element.type == namedFields.type));
+
+		// Should not be field y.
+		static assert(element.name != "y");
+
+		// Should be one of fields x or z.
+		static assert(element.name == "x" || element.name == "z");
+	}
+
+	auto allowedFields = fields.allow!Attr;
+
+	// Should match parent type.
+	static assert(is(allowedFields.type == fields.type));
+
+	// Should not be empty.
+	static assert(!allowedFields.empty);
+
+	// Should have 3 elements.
+	static assert(allowedFields.length == 3);
+
+	foreach(element; allowedFields)
+	{
+		// Should match parent type.
+		static assert(is(element.type == allowedFields.type));
+
+		// Should not be field tmp.
+		static assert(element.name != "tmp");
+
+		// Should have attribute Attr.
+		static assert(element.hasAttribute!Attr);
+	}
+
+	auto forbiddenFields = fields.forbid!Limit;
+
+	// Should match parent type.
+	static assert(is(forbiddenFields.type == fields.type));
+
+	// Should not be empty.
+	static assert(!forbiddenFields.empty);
+
+	// Should have 1 element.
+	static assert(forbiddenFields.length == 1);
+
+	foreach(element; forbiddenFields)
+	{
+		// Should match parent type.
+		static assert(is(element.type == forbiddenFields.type));
+
+		// Should be field tmp.
+		static assert(element.name == "tmp");
+
+		// Should have attribute Other.
+		static assert(!element.hasAttribute!Limit);
+
+		// Should have no attributes.
+		static assert(element.attributes.empty);
 	}
 
 	auto functions = query.functions;

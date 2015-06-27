@@ -36,15 +36,75 @@ struct DQuery(QueryType, QueryElements...)
 	@property
 	alias length = Alias!(elements.length);
 
-	/++
-	 + Hidden constructor. No touchie.
-	 ++/
-	@disable this();
+	@property
+	static auto opCall()
+	{
+		DQuery!(QueryType, QueryElements) query = void;
+		return query;
+	}
+
+	@property
+	static auto names(Names...)()
+	{
+		template NameFilter(alias Name)
+		{
+			alias NameFilter(alias Element) = Alias!(
+				__traits(compiles, {
+					static assert(Element.name == Name);
+				})
+			);
+		}
+
+		auto query = DQuery!(QueryType, QueryElements)();
+		return query.filter!(templateOr!(staticMap!(NameFilter, Names)));
+	}
+
+	@property
+	static auto allow(Attributes...)()
+	{
+		template AllowFilter(alias Attribute)
+		{
+			alias AllowFilter(alias Element) = Alias!(
+				Element.hasAttribute!Attribute
+			);
+		}
+
+		auto query = DQuery!(QueryType, QueryElements)();
+		return query.filter!(templateOr!(staticMap!(AllowFilter, Attributes)));
+	}
+
+	@property
+	static auto forbid(Attributes...)()
+	{
+		template ForbidFilter(alias Attribute)
+		{
+			alias ForbidFilter(alias Element) = Alias!(
+				!Element.hasAttribute!Attribute
+			);
+		}
+
+		auto query = DQuery!(QueryType, QueryElements)();
+		return query.filter!(templateAnd!(staticMap!(ForbidFilter, Attributes)));
+	}
+
+	@property
+	static auto require(Attributes...)()
+	{
+		template RequireFilter(alias Attribute)
+		{
+			alias RequireFilter(alias Element) = Alias!(
+				Element.hasAttribute!Attribute
+			);
+		}
+
+		auto query = DQuery!(QueryType, QueryElements)();
+		return query.filter!(templateAnd!(staticMap!(RequireFilter, Attributes)));
+	}
 
 	@property
 	static auto fields()()
 	{
-		DQuery!(QueryType, QueryElements) query = void;
+		auto query = DQuery!(QueryType, QueryElements)();
 		return query.filter!(f => f.isField);
 	}
 
@@ -54,14 +114,14 @@ struct DQuery(QueryType, QueryElements...)
 	@property
 	static auto functions()()
 	{
-		DQuery!(QueryType, QueryElements) query = void;
+		auto query = DQuery!(QueryType, QueryElements)();
 		return query.filter!(f => f.isFunction);
 	}
 
 	@property
 	static auto aggregates()()
 	{
-		DQuery!(QueryType, QueryElements) query = void;
+		auto query = DQuery!(QueryType, QueryElements)();
 		return query.filter!(f => f.isAggregate);
 	}
 
@@ -72,21 +132,19 @@ template map(alias Pred)
 	@property
 	auto map(QueryType, QueryElements...)(DQuery!(QueryType, QueryElements) query)
 	if(__traits(compiles, {
-		DQuery!(QueryType, staticMap!(UnaryToPred!Pred, QueryElements)) result = void;
+		return DQuery!(QueryType, staticMap!(UnaryToPred!Pred, QueryElements))();
 	}))
 	{
-		DQuery!(QueryType, staticMap!(UnaryToPred!Pred, QueryElements)) result = void;
-		return result;
+		return DQuery!(QueryType, staticMap!(UnaryToPred!Pred, QueryElements))();
 	}
 
 	@property
 	auto map(QueryType, QueryElements...)(DQuery!(QueryType, QueryElements) query)
 	if(__traits(compiles, {
-		DQuery!(QueryType, staticMap!(Pred, QueryElements)) result = void;
+		return DQuery!(QueryType, staticMap!(Pred, QueryElements))();
 	}))
 	{
-		DQuery!(QueryType, staticMap!(Pred, QueryElements)) result = void;
-		return result;
+		return DQuery!(QueryType, staticMap!(Pred, QueryElements))();
 	}
 }
 
@@ -95,20 +153,18 @@ template filter(alias Pred)
 	@property
 	auto filter(QueryType, QueryElements...)(DQuery!(QueryType, QueryElements) query)
 	if(__traits(compiles, {
-		DQuery!(QueryType, Filter!(UnaryToPred!Pred, QueryElements)) result = void;
+		return DQuery!(QueryType, Filter!(UnaryToPred!Pred, QueryElements))();
 	}))
 	{
-		DQuery!(QueryType, Filter!(UnaryToPred!Pred, QueryElements)) result = void;
-		return result;
+		return DQuery!(QueryType, Filter!(UnaryToPred!Pred, QueryElements))();
 	}
 
 	@property
 	auto filter(QueryType, QueryElements...)(DQuery!(QueryType, QueryElements) query)
 	if(__traits(compiles, {
-		DQuery!(QueryType, Filter!(Pred, QueryElements)) result = void;
+		return DQuery!(QueryType, Filter!(Pred, QueryElements))();
 	}))
 	{
-		DQuery!(QueryType, Filter!(Pred, QueryElements)) result = void;
-		return result;
+		return DQuery!(QueryType, Filter!(Pred, QueryElements))();
 	}
 }
