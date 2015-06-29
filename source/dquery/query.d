@@ -49,9 +49,21 @@ struct DQuery(QueryType, QueryElements...)
 		template NameFilter(alias Name)
 		{
 			alias NameFilter(alias Element) = Alias!(
-				__traits(compiles, {
-					static assert(Element.name == Name);
-				})
+				Element.isName!Name
+			);
+		}
+
+		auto query = DQuery!(QueryType, QueryElements)();
+		return query.filter!(templateOr!(staticMap!(NameFilter, Names)));
+	}
+
+	@property
+	static auto types(Types...)()
+	{
+		template TypeFilter(alias Type)
+		{
+			alias TypeFilter(alias Element) = Alias!(
+				Element.isTypeOf!Type
 			);
 		}
 

@@ -58,7 +58,8 @@ unittest
 	alias Limit = Coord.Limit;
 	alias None = Coord.None;
 
-	auto query = query!Coord;
+	Coord coord = Coord(1, 2, 3);
+	auto query = coord.query;
 
 	// Should not be empty.
 	static assert(!query.empty);
@@ -82,7 +83,7 @@ unittest
 		// Should match parent type.
 		static assert(is(element.type == fields.type));
 
-		static if(element.name != "tmp")
+		static if(!element.isName!"tmp")
 		{
 			// Should have attribute Attr.
 			static assert(element.hasAttribute!Attr);
@@ -234,10 +235,13 @@ unittest
 		static assert(is(element.type == namedFields.type));
 
 		// Should not be field y.
-		static assert(element.name != "y");
+		static assert(!element.isName!"y");
 
 		// Should be one of fields x or z.
-		static assert(element.name == "x" || element.name == "z");
+		static assert(
+			element.isName!"x" ||
+			element.isName!"z"
+		);
 	}
 
 	auto allowedFields = fields.allow!Attr;
@@ -257,7 +261,7 @@ unittest
 		static assert(is(element.type == allowedFields.type));
 
 		// Should not be field tmp.
-		static assert(element.name != "tmp");
+		static assert(!element.isName!"tmp");
 
 		// Should have attribute Attr.
 		static assert(element.hasAttribute!Attr);
@@ -280,7 +284,7 @@ unittest
 		static assert(is(element.type == forbiddenFields.type));
 
 		// Should be field tmp.
-		static assert(element.name == "tmp");
+		static assert(element.isName!"tmp");
 
 		// Should have attribute Other.
 		static assert(!element.hasAttribute!Limit);
@@ -344,7 +348,7 @@ unittest
 		// Should be a function.
 		static assert(element.isFunction);
 
-		static if(element.name == "__ctor")
+		static if(element.isName!"__ctor")
 		{
 			// Should not have arity 0.
 			static assert(!element.isArity!0);
@@ -367,7 +371,7 @@ unittest
 			// Should return a Coord.
 			static assert(element.isReturnTypeOf!Coord);
 		}
-		else static if(element.name == "getCoords")
+		else static if(element.isName!"getCoords")
 		{
 			// Should have arity 0.
 			static assert(element.isArity!0);
