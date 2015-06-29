@@ -28,21 +28,16 @@ struct DQueryElement(QueryType, string Name)
 	alias name = Name;
 
 	/++
-	 + Property that returns the element's attributes.
+	 + Property that returns true if the name matches.
 	 ++/
 	@property
-	alias attributes = Alias!(
-		DQueryAttributes!(
-			QueryType,
-			staticMap!(
-				MapToAttribute,
-				GetAttributes!(QueryType, Name)
-			)
-		)()
+	alias isName(string Name) = Alias!(
+		name == Name
 	);
 
 	/++
-	 + Property that returns true if the element 
+	 + Property that returns true if the element has an attribute
+	 + of the given type.
 	 ++/
 	@property
 	alias hasAttribute(Type) = Alias!(
@@ -238,6 +233,30 @@ struct DQueryElement(QueryType, string Name)
 		})
 	);
 
+	/++
+	 + Property that returns the element's attributes.
+	 ++/
+	@property
+	static auto attributes()()
+	{
+		return DQueryAttributes!(
+			QueryType,
+			staticMap!(
+				MapToAttribute,
+				GetAttributes!(QueryType, Name)
+			)
+		)();
+	}
+ 
+	/++
+	 + Property that returns the element's allowed attributes.
+	 ++/
+	@property
+	static auto attributes(Allow...)()
+	{
+		return attributes.allow!Allow;
+	}
+
 	@property
 	static auto query()()
 	if(isAggregate)
@@ -259,6 +278,11 @@ struct DQueryElement(QueryType, string Name)
 	{
 		DQueryElement!(QueryType, Name) element = void;
 		return element;
+	}
+
+	string toString()
+	{
+		return Name;
 	}
 
 }
