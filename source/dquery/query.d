@@ -60,7 +60,7 @@ struct DQuery(QueryType, QueryElements...)
 	@property
 	static auto types(Types...)()
 	{
-		template TypeFilter(alias Type)
+		template TypeFilter(Type)
 		{
 			alias TypeFilter(alias Element) = Alias!(
 				Element.isTypeOf!Type
@@ -68,7 +68,35 @@ struct DQuery(QueryType, QueryElements...)
 		}
 
 		auto query = DQuery!(QueryType, QueryElements)();
-		return query.filter!(templateOr!(staticMap!(NameFilter, Names)));
+		return query.filter!(templateOr!(staticMap!(TypeFilter, Types)));
+	}
+
+	@property
+	static auto returns(Types...)()
+	{
+		template ReturnFilter(Type)
+		{
+			alias ReturnFilter(alias Element) = Alias!(
+				Element.isReturnTypeOf!Type
+			);
+		}
+
+		auto query = DQuery!(QueryType, QueryElements)();
+		return query.filter!(templateOr!(staticMap!(ReturnFilter, Types)));
+	}
+
+	@property
+	static auto arities(Arities...)()
+	{
+		template ArityFilter(int Arity)
+		{
+			alias ArityFilter(alias Element) = Alias!(
+				Element.isArity!Arity
+			);
+		}
+
+		auto query = DQuery!(QueryType, QueryElements)();
+		return query.filter!(templateOr!(staticMap!(ArityFilter, Arities)));
 	}
 
 	@property
