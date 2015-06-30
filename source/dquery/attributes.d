@@ -12,38 +12,40 @@ struct DQueryAttributes(QueryType, Attributes...)
 	alias attributes this;
 
 	/++
-	 + Property that returns the type being queried.
+	 + Returns the type being queried.
 	 ++/
 	@property
 	alias type = QueryType;
 
 	/++
-	 + Property that returns the list of attributes.
+	 + Returns a tuple of attributes in the query.
 	 ++/
 	@property
 	alias attributes = Attributes;
 
 	/++
-	 + Property that returns true if the list of attributes is empty.
+	 + Returns true if the list of attributes is empty.
 	 ++/
 	@property
 	alias empty = Alias!(length == 0);
 
 	/++
-	 + Property that returns the number of attributes.
+	 + Returns the number of attributes in the query.
 	 ++/
 	@property
 	alias length = Alias!(Attributes.length);
 
 	/++
-	 + Proprety that returns a transformed list of attributes with
-	 + all duplicateds removed.
+	 + Returns a transformed list of attributes with all duplicateds removed.
 	 ++/
 	@property
 	alias unique = Alias!(
 		DQueryAttributes!(QueryType, NoDuplicates!Attributes)()
 	);
 
+	/++
+	 + Returns an uninitialized value of the query's type.
+	 ++/
 	@property
 	static auto opCall()
 	{
@@ -51,6 +53,9 @@ struct DQueryAttributes(QueryType, Attributes...)
 		return attributes;
 	}
 
+	/++
+	 + Returns a query for the type that produced this attribute query.
+	 ++/
 	@property
 	static auto parent()()
 	{
@@ -67,14 +72,14 @@ struct DQueryAttributes(QueryType, Attributes...)
 	}
 
 	/++
-	 + Property that returns a subset of the list of attributes
-	 + which match at least one of the given types.
+	 + Returns a subset of the list of attributes which match
+	 + at least one of the given types.
 	 ++/
 	@property
-	static auto allow(TList...)()
+	static auto anyOf(TList...)()
 	if(TList.length > 0)
 	{
-		alias AllowFilter(Type) = Alias!(
+		alias AnyOfFilter(Type) = Alias!(
 			UnaryToPred!(attribute => attribute.isTypeOf!Type)
 		);
 
@@ -82,7 +87,7 @@ struct DQueryAttributes(QueryType, Attributes...)
 
 		static if(Attributes.length > 0)
 		{
-			alias Pred = templateOr!(staticMap!(AllowFilter, TList));
+			alias Pred = templateOr!(staticMap!(AnyOfFilter, TList));
 			return query.filter!Pred;
 		}
 		else
@@ -96,10 +101,10 @@ struct DQueryAttributes(QueryType, Attributes...)
 	 + which match none of the given types.
 	 ++/
 	@property
-	static auto forbid(TList...)()
+	static auto noneOf(TList...)()
 	if(TList.length > 0)
 	{
-		alias ForbidFilter(Type) = Alias!(
+		alias NoneOfFilter(Type) = Alias!(
 			UnaryToPred!(attribute => !attribute.isTypeOf!Type)
 		);
 
@@ -107,7 +112,7 @@ struct DQueryAttributes(QueryType, Attributes...)
 
 		static if(Attributes.length > 0)
 		{
-			alias Pred = templateAnd!(staticMap!(ForbidFilter, TList));
+			alias Pred = templateAnd!(staticMap!(NoneOfFilter, TList));
 			return query.filter!Pred;
 		}
 		else
@@ -116,9 +121,11 @@ struct DQueryAttributes(QueryType, Attributes...)
 		}
 	}
 
+	/++
+	 + Provides query validation functions tied to length.
+	 ++/
 	@property
-	template ensure(string Attr)
-	if(Attr == "length")
+	template ensure(string Attr : "length")
 	{
 		import std.conv : text;
 

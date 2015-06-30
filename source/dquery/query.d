@@ -186,11 +186,11 @@ struct DQuery(QueryType, QueryElements...)
 	}
 
 	@property
-	static auto allow(Attributes...)()
+	static auto allOf(Attributes...)()
 	{
-		template AllowFilter(alias Attribute)
+		template AllOfFilter(alias Attribute)
 		{
-			alias AllowFilter(alias Element) = Alias!(
+			alias AllOfFilter(alias Element) = Alias!(
 				Element.hasAttribute!Attribute
 			);
 		}
@@ -199,7 +199,7 @@ struct DQuery(QueryType, QueryElements...)
 
 		static if(query.length > 0)
 		{
-			return query.filter!(templateOr!(staticMap!(AllowFilter, Attributes)));
+			return query.filter!(templateAnd!(staticMap!(AllOfFilter, Attributes)));
 		}
 		else
 		{
@@ -208,11 +208,33 @@ struct DQuery(QueryType, QueryElements...)
 	}
 
 	@property
-	static auto forbid(Attributes...)()
+	static auto anyOf(Attributes...)()
 	{
-		template ForbidFilter(alias Attribute)
+		template AnyOfFilter(alias Attribute)
 		{
-			alias ForbidFilter(alias Element) = Alias!(
+			alias AnyOfFilter(alias Element) = Alias!(
+				Element.hasAttribute!Attribute
+			);
+		}
+
+		auto query = DQuery!(QueryType, QueryElements)();
+
+		static if(query.length > 0)
+		{
+			return query.filter!(templateOr!(staticMap!(AnyOfFilter, Attributes)));
+		}
+		else
+		{
+			return query;
+		}
+	}
+
+	@property
+	static auto noneOf(Attributes...)()
+	{
+		template NoneOfFilter(alias Attribute)
+		{
+			alias NoneOfFilter(alias Element) = Alias!(
 				!Element.hasAttribute!Attribute
 			);
 		}
@@ -221,7 +243,7 @@ struct DQuery(QueryType, QueryElements...)
 
 		static if(query.length > 0)
 		{
-			return query.filter!(templateAnd!(staticMap!(ForbidFilter, Attributes)));
+			return query.filter!(templateAnd!(staticMap!(NoneOfFilter, Attributes)));
 		}
 		else
 		{
@@ -230,30 +252,7 @@ struct DQuery(QueryType, QueryElements...)
 	}
 
 	@property
-	static auto require(Attributes...)()
-	{
-		template RequireFilter(alias Attribute)
-		{
-			alias RequireFilter(alias Element) = Alias!(
-				Element.hasAttribute!Attribute
-			);
-		}
-
-		auto query = DQuery!(QueryType, QueryElements)();
-
-		static if(query.length > 0)
-		{
-			return query.filter!(templateAnd!(staticMap!(RequireFilter, Attributes)));
-		}
-		else
-		{
-			return query;
-		}
-	}
-
-	@property
-	template ensure(string Attr)
-	if(Attr == "length")
+	template ensure(string Attr : "length")
 	{
 		import std.conv : text;
 
