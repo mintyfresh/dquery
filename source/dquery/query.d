@@ -15,29 +15,32 @@ struct DQuery(QueryType, QueryElements...)
 	alias elements this;
 
 	/++
-	 + Property that returns the type being queried.
+	 + Returns the type being queried.
 	 ++/
 	@property
 	alias type = QueryType;
 
 	/++
-	 + Property that returns the elements in the query.
+	 + Returns the elements in the query.
 	 ++/
 	@property
 	alias elements = QueryElements;
 
 	/++
-	 + Property that returns true if the query has no elements.
+	 + Returns true if the query has no elements.
 	 ++/
 	@property
 	alias empty = Alias!(length == 0);
 
 	/++
-	 + Property that returns the number of elements in the query.
+	 + Returns the number of elements in the query.
 	 ++/
 	@property
 	alias length = Alias!(elements.length);
 
+	/++
+	 + Return an uninitialized value of the query's type.
+	 ++/
 	@property
 	static auto opCall()
 	{
@@ -45,6 +48,9 @@ struct DQuery(QueryType, QueryElements...)
 		return query;
 	}
 
+	/++
+	 + Returns the query with all filters removed.
+	 ++/
 	@property
 	static auto reset()()
 	{
@@ -53,7 +59,7 @@ struct DQuery(QueryType, QueryElements...)
 	}
 
 	/++
-	 + Property that returns the type's attributes.
+	 + Returns the type's attributes.
 	 ++/
 	@property
 	static auto attributes()()
@@ -72,7 +78,7 @@ struct DQuery(QueryType, QueryElements...)
 	}
  
 	/++
-	 + Property that returns the type's allowed attributes.
+	 + Returns the type's allowed attributes.
 	 ++/
 	@property
 	static auto attributes(Allow...)()
@@ -81,12 +87,18 @@ struct DQuery(QueryType, QueryElements...)
 		return attributes.allow!Allow;
 	}
 
+	/++
+	 + Filters elements that match the given name.
+	 ++/
 	@property
 	static auto name(string Name)()
 	{
 		return names!Name;
 	}
 
+	/++
+	 + Filters elements that match one of the given names.
+	 ++/
 	@property
 	static auto names(Names...)()
 	{
@@ -109,6 +121,9 @@ struct DQuery(QueryType, QueryElements...)
 		}
 	}
 
+	/++
+	 + Filters elements that match one of the given types.
+	 ++/
 	@property
 	static auto types(Types...)()
 	{
@@ -131,6 +146,9 @@ struct DQuery(QueryType, QueryElements...)
 		}
 	}
 
+	/++
+	 + Filters elements that return one of the given types.
+	 ++/
 	@property
 	static auto returns(Types...)()
 	{
@@ -153,12 +171,18 @@ struct DQuery(QueryType, QueryElements...)
 		}
 	}
 
+	/++
+	 + Filters elements that match the given arity value.
+	 ++/
 	@property
 	static auto arity(int Arity)()
 	{
 		return arities!Arity;
 	}
 
+	/++
+	 + Filters elements that match one of the given arity values.
+	 ++/
 	@property
 	static auto arities(Arities...)()
 	{
@@ -181,6 +205,9 @@ struct DQuery(QueryType, QueryElements...)
 		}
 	}
 
+	/++
+	 + Filters elements that match the given parameter list.
+	 ++/
 	@property
 	static auto parameters(Parameters...)()
 	{
@@ -188,6 +215,9 @@ struct DQuery(QueryType, QueryElements...)
 		return query.filter!(f => f.isParameterTypesOf!Parameters);
 	}
 
+	/++
+	 + Filters elements that have all of the given attributes.
+	 ++/
 	@property
 	static auto allOf(Attributes...)()
 	{
@@ -210,6 +240,9 @@ struct DQuery(QueryType, QueryElements...)
 		}
 	}
 
+	/++
+	 + Filters elements that have any of the given attributes.
+	 ++/
 	@property
 	static auto anyOf(Attributes...)()
 	{
@@ -232,6 +265,9 @@ struct DQuery(QueryType, QueryElements...)
 		}
 	}
 
+	/++
+	 + Filters elements that have none of the given attributes.
+	 ++/
 	@property
 	static auto noneOf(Attributes...)()
 	{
@@ -254,6 +290,9 @@ struct DQuery(QueryType, QueryElements...)
 		}
 	}
 
+	/++
+	 + Provides validations regarding the query's length.
+	 ++/
 	@property
 	template ensure(string Attr : "length")
 	{
@@ -292,6 +331,9 @@ struct DQuery(QueryType, QueryElements...)
 		}
 	}
 
+	/++
+	 + Filters elements that are fields.
+	 ++/
 	@property
 	static auto fields()()
 	{
@@ -299,6 +341,9 @@ struct DQuery(QueryType, QueryElements...)
 		return query.filter!(f => f.isField);
 	}
 
+	/++
+	 + Filters elements that are fields and match any of the given names.
+	 ++/
 	@property
 	static auto fields(Names...)()
 	if(Names.length > 0)
@@ -307,7 +352,7 @@ struct DQuery(QueryType, QueryElements...)
 	}
 
 	/++
-	 +
+	 + Filters elements that are functions.
 	 ++/
 	@property
 	static auto functions()()
@@ -316,6 +361,9 @@ struct DQuery(QueryType, QueryElements...)
 		return query.filter!(f => f.isFunction);
 	}
 
+	/++
+	 + Filters elements that are functions and match any of the given names
+	 ++/
 	@property
 	static auto functions(Names...)()
 	if(Names.length > 0)
@@ -323,6 +371,9 @@ struct DQuery(QueryType, QueryElements...)
 		return functions.names!Names;
 	}
 
+	/++
+	 + Filters elements that are constructors.
+	 ++/
 	@property
 	static auto constructors()()
 	{
@@ -330,6 +381,9 @@ struct DQuery(QueryType, QueryElements...)
 		return query.filter!(f => f.isConstructor);
 	}
 
+	/++
+	 + Filters elements that are destructors.
+	 ++/
 	@property
 	static auto destructors()()
 	{
@@ -337,6 +391,9 @@ struct DQuery(QueryType, QueryElements...)
 		return query.filter!(f => f.isDestructor);
 	}
 
+	/++
+	 + Filters elements that are aggregate types.
+	 ++/
 	@property
 	static auto aggregates()()
 	{
@@ -344,6 +401,9 @@ struct DQuery(QueryType, QueryElements...)
 		return query.filter!(f => f.isAggregate);
 	}
 
+	/++
+	 + Filters elements that are aggregate types and match any of the given names.
+	 ++/
 	@property
 	static auto aggregates(Names...)()
 	if(Names.length > 0)
