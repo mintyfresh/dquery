@@ -8,7 +8,7 @@ import dquery.attribute;
 import dquery.attributes;
 import dquery.helper;
 
-struct DQueryElement(QueryType, string Name)
+struct DQueryElement(QueryType, string Name, ParamTypes...)
 {
 
 	/++
@@ -22,6 +22,12 @@ struct DQueryElement(QueryType, string Name)
 	 ++/
 	@property
 	alias name = Name;
+
+	static if(isFunction)
+	{
+		@property
+		alias parameters = ParamTypes;
+	}
 
 	/++
 	 + Property that returns true if the name matches.
@@ -106,15 +112,23 @@ struct DQueryElement(QueryType, string Name)
 		is(typeof(GetMember!(QueryType, Name)) == function)
 	);
 
+	@property
+	alias isConstructor = Alias!(
+		isFunction && isName!"__ctor"
+	);
+
+	@property
+	alias isDestructor = Alias!(
+		isFunction && isName!"__dtor"
+	);
+
 	/++
 	 + Property that return true if the element's arity matches the given
 	 + number of parameters.
 	 ++/
 	@property
 	alias isArity(int Count) = Alias!(
-		__traits(compiles, {
-			static assert(arity!(GetMember!(QueryType, Name)) == Count);
-		})
+		isFunction && ParamTypes.length == Count
 	);
 
 	/++
@@ -154,12 +168,7 @@ struct DQueryElement(QueryType, string Name)
 
 	@property
 	alias isParameterTypesOf(TList...) = Alias!(
-		__traits(compiles, {
-			static assert(
-				Compare!(ParameterTypeTuple!(GetMember!(QueryType, Name)))
-				.With!(TList)
-			);
-		})
+		isFunction && Compare!(ParamTypes).With!(TList)
 	);
 
 	/++
@@ -248,7 +257,7 @@ struct DQueryElement(QueryType, string Name)
 	@property
 	static auto opCall()
 	{
-		DQueryElement!(QueryType, Name) element = void;
+		DQueryElement!(QueryType, Name, ParamTypes) element = void;
 		return element;
 	}
 
@@ -256,30 +265,15 @@ struct DQueryElement(QueryType, string Name)
 	static auto query()()
 	if(isAggregate)
 	{
-		import dquery.query;
-
-		alias NewType = GetMember!(QueryType, Name);
-		enum NewElements = __traits(allMembers, NewType);
-
-		alias MapToElement(string Name) = Alias!(
-			DQueryElement!(NewType, Name)()
-		);
-
-		return DQuery!(NewType, staticMap!(MapToElement, NewElements))();
+		import dquery.d;
+		return query!(GetMember!(QueryType, Name));
 	}
 
 	@property
 	static auto parent()()
 	{
-		import dquery.query;
-
-		enum QueryElements = __traits(allMembers, QueryType);
-
-		alias MapToElement(string Name) = Alias!(
-			DQueryElement!(QueryType, Name)()
-		);
-
-		return DQuery!(NewType, staticMap!(MapToElement, QueryElements))();
+		import dquery.d;
+		return query!QueryType;
 	}
 
 	/++
@@ -310,7 +304,6 @@ struct DQueryElement(QueryType, string Name)
 	{
 		return attributes.allow!Allow;
 	}
-
 
 	string toString()
 	{

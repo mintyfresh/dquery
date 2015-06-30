@@ -48,12 +48,8 @@ struct DQuery(QueryType, QueryElements...)
 	@property
 	static auto reset()()
 	{
-		alias MapToElement(string Name) = Alias!(
-			DQueryElement!(QueryType, Name)()
-		);
-
-		enum Elements = __traits(allMembers, QueryType);
-		return DQuery!(QueryType, staticMap!(MapToElement, Elements))();
+		import dquery.d;
+		return query!QueryType;
 	}
 
 	/++
@@ -183,6 +179,13 @@ struct DQuery(QueryType, QueryElements...)
 		{
 			return query;
 		}
+	}
+
+	@property
+	static auto parameters(Parameters...)()
+	{
+		auto query = DQuery!(QueryType, QueryElements)();
+		return query.filter!(f => f.isParameterTypesOf!Parameters);
 	}
 
 	@property
@@ -318,6 +321,20 @@ struct DQuery(QueryType, QueryElements...)
 	if(Names.length > 0)
 	{
 		return functions.names!Names;
+	}
+
+	@property
+	static auto constructors()()
+	{
+		auto query = DQuery!(QueryType, QueryElements)();
+		return query.filter!(f => f.isConstructor);
+	}
+
+	@property
+	static auto destructors()()
+	{
+		auto query = DQuery!(QueryType, QueryElements)();
+		return query.filter!(f => f.isDestructor);
 	}
 
 	@property

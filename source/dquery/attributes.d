@@ -59,16 +59,8 @@ struct DQueryAttributes(QueryType, Attributes...)
 	@property
 	static auto parent()()
 	{
-		import dquery.query;
-		import dquery.element;
-
-		enum QueryElements = __traits(allMembers, QueryType);
-
-		alias MapToElement(string Name) = Alias!(
-			DQueryElement!(QueryType, Name)()
-		);
-
-		return DQuery!(QueryType, staticMap!(MapToElement, QueryElements))();
+		import dquery.d;
+		return query!QueryType;
 	}
 
 	/++
