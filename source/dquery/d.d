@@ -1,6 +1,7 @@
 
 module dquery.d;
 
+import std.traits;
 import std.typetuple;
 
 public import dquery.attribute;
@@ -17,9 +18,23 @@ public import dquery.query;
  ++/
 auto query(QueryType)()
 {
-	alias MapToElement(string Name) = Alias!(
-		DQueryElement!(QueryType, Name)()
-	);
+	template MapToElement(string Name)
+	{
+		static if(is(typeof(GetMember!(QueryType, Name)) == function))
+		{
+			alias MapToOverload(alias Overload) = Alias!(
+				DQueryElement!(QueryType, Name, ParameterTypeTuple!Overload)()
+			);
+
+			alias MapToElement = staticMap!(
+				MapToOverload, __traits(getOverloads, QueryType, Name)
+			);
+		}
+		else
+		{
+			alias MapToElement = Alias!(DQueryElement!(QueryType, Name)());
+		}
+	}
 
 	enum Elements = __traits(allMembers, QueryType);
 	return DQuery!(QueryType, staticMap!(MapToElement, Elements))();
