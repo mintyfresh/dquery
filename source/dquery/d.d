@@ -20,6 +20,7 @@ auto query(QueryType)()
 {
 	template MapToElement(string Name)
 	{
+		// Check for functions; each overload is kept as an element.
 		static if(is(typeof(GetMember!(QueryType, Name)) == function))
 		{
 			alias MapToOverload(alias Overload) = Alias!(
