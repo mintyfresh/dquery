@@ -245,6 +245,43 @@ struct DQueryElement(QueryType, string Name)
 		})
 	);
 
+	@property
+	static auto opCall()
+	{
+		DQueryElement!(QueryType, Name) element = void;
+		return element;
+	}
+
+	@property
+	static auto query()()
+	if(isAggregate)
+	{
+		import dquery.query;
+
+		alias NewType = GetMember!(QueryType, Name);
+		enum NewElements = __traits(allMembers, NewType);
+
+		alias MapToElement(string Name) = Alias!(
+			DQueryElement!(NewType, Name)()
+		);
+
+		return DQuery!(NewType, staticMap!(MapToElement, NewElements))();
+	}
+
+	@property
+	static auto parent()()
+	{
+		import dquery.query;
+
+		enum QueryElements = __traits(allMembers, QueryType);
+
+		alias MapToElement(string Name) = Alias!(
+			DQueryElement!(QueryType, Name)()
+		);
+
+		return DQuery!(NewType, staticMap!(MapToElement, QueryElements))();
+	}
+
 	/++
 	 + Property that returns the element's attributes.
 	 ++/
@@ -274,28 +311,6 @@ struct DQueryElement(QueryType, string Name)
 		return attributes.allow!Allow;
 	}
 
-	@property
-	static auto query()()
-	if(isAggregate)
-	{
-		import dquery.query;
-
-		alias NewType = GetMember!(QueryType, Name);
-		enum NewElements = __traits(allMembers, NewType);
-
-		alias MapToElement(string Name) = Alias!(
-			DQueryElement!(NewType, Name)()
-		);
-
-		return DQuery!(NewType, staticMap!(MapToElement, NewElements))();
-	}
-
-	@property
-	static auto opCall()
-	{
-		DQueryElement!(QueryType, Name) element = void;
-		return element;
-	}
 
 	string toString()
 	{
