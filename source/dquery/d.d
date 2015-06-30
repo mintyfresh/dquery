@@ -8,6 +8,7 @@ public import dquery.attribute;
 public import dquery.attributes;
 public import dquery.element;
 public import dquery.helper;
+public import dquery.overload;
 public import dquery.query;
 
 /++
@@ -24,7 +25,11 @@ auto query(QueryType)()
 		static if(is(typeof(GetMember!(QueryType, Name)) == function))
 		{
 			alias MapToOverload(alias Overload) = Alias!(
-				DQueryElement!(QueryType, Name, ParameterTypeTuple!Overload)()
+				DQueryElement!(
+					QueryType, Name, DQueryOverload!(
+						arity!Overload, ReturnType!Overload, ParameterTypeTuple!Overload
+					)()
+				)()
 			);
 
 			alias MapToElement = staticMap!(

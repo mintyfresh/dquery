@@ -8,7 +8,7 @@ import dquery.attribute;
 import dquery.attributes;
 import dquery.helper;
 
-struct DQueryElement(QueryType, string Name, ParamTypes...)
+struct DQueryElement(QueryType, string Name, alias Overload = null)
 {
 
 	/++
@@ -22,15 +22,6 @@ struct DQueryElement(QueryType, string Name, ParamTypes...)
 	 ++/
 	@property
 	alias name = Name;
-
-	static if(isFunction)
-	{
-		/++
-		 + Returns the parameter types of the element.
-		 ++/
-		@property
-		alias parameters = ParamTypes;
-	}
 
 	/++
 	 + Returns true if the name matches.
@@ -103,7 +94,8 @@ struct DQueryElement(QueryType, string Name, ParamTypes...)
 	 ++/
 	@property
 	alias isFunction = Alias!(
-		is(typeof(GetMember!(QueryType, Name)) == function)
+		is(typeof(GetMember!(QueryType, Name)) == function) &&
+		!is(typeof(Overload) == typeof(null))
 	);
 
 	/++
@@ -127,7 +119,9 @@ struct DQueryElement(QueryType, string Name, ParamTypes...)
 	 ++/
 	@property
 	alias isArity(int Count) = Alias!(
-		isFunction && ParamTypes.length == Count
+		isFunction && __traits(compiles, {
+			static assert(Overload.arity == Count);
+		})
 	);
 
 	/++
@@ -135,8 +129,8 @@ struct DQueryElement(QueryType, string Name, ParamTypes...)
 	 ++/
 	@property
 	alias isReturnTypeOf(Type) = Alias!(
-		__traits(compiles, {
-			static assert(is(ReturnType!(GetMember!(QueryType, Name)) == Type));
+		isFunction && __traits(compiles, {
+			static assert(is(Overload.returnType == Type));
 		})
 	);
 
@@ -146,8 +140,8 @@ struct DQueryElement(QueryType, string Name, ParamTypes...)
 	 ++/
 	@property
 	alias isReturnAssignableTo(Type) = Alias!(
-		__traits(compiles, {
-			ReturnType!(GetMember!(QueryType, Name)) t1 = void;
+		isFunction && __traits(compiles, {
+			Overload.returnType t1 = void;
 			Type t2 = t1;
 		})
 	);
@@ -158,9 +152,9 @@ struct DQueryElement(QueryType, string Name, ParamTypes...)
 	 ++/
 	@property
 	alias isReturnAssignableFrom(Type) = Alias!(
-		__traits(compiles, {
+		isFunction && __traits(compiles, {
 			Type t1 = void;
-			ReturnType!(GetMember!(QueryType, Name)) t2 = t1;
+			Overload.returnType t2 = t1;
 		})
 	);
 
@@ -169,7 +163,9 @@ struct DQueryElement(QueryType, string Name, ParamTypes...)
 	 ++/
 	@property
 	alias isParameterTypesOf(TList...) = Alias!(
-		isFunction && Compare!(ParamTypes).With!(TList)
+		isFunction && __traits(compiles, {
+			static assert(Compare!(Overload.parameters).With!(TList));
+		})
 	);
 
 	/++
@@ -266,7 +262,7 @@ struct DQueryElement(QueryType, string Name, ParamTypes...)
 	@property
 	static auto opCall()
 	{
-		DQueryElement!(QueryType, Name, ParamTypes) element = void;
+		DQueryElement!(QueryType, Name, Overload) element = void;
 		return element;
 	}
 
