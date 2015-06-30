@@ -12,25 +12,28 @@ struct DQueryElement(QueryType, string Name, ParamTypes...)
 {
 
 	/++
-	 + Property that returns the type being queried.
+	 + Returns the type being queried.
 	 ++/
 	@property
 	alias type = QueryType;
 
 	/++
-	 + Property that returns the name of the element.
+	 + Returns the name of the element.
 	 ++/
 	@property
 	alias name = Name;
 
 	static if(isFunction)
 	{
+		/++
+		 + Returns the parameter types of the element.
+		 ++/
 		@property
 		alias parameters = ParamTypes;
 	}
 
 	/++
-	 + Property that returns true if the name matches.
+	 + Returns true if the name matches.
 	 ++/
 	@property
 	alias isName(string Name) = Alias!(
@@ -38,8 +41,7 @@ struct DQueryElement(QueryType, string Name, ParamTypes...)
 	);
 
 	/++
-	 + Property that returns true if the element has an attribute
-	 + of the given type.
+	 + Returns true if the element has an attribute of the given type.
 	 ++/
 	@property
 	alias hasAttribute(Type) = Alias!(
@@ -47,7 +49,7 @@ struct DQueryElement(QueryType, string Name, ParamTypes...)
 	);
 
 	/++
-	 + Property that returns the element's access protection.
+	 + Returns the element's access protection.
 	 ++/
 	@property
 	alias protection = Alias!(
@@ -55,7 +57,7 @@ struct DQueryElement(QueryType, string Name, ParamTypes...)
 	);
 
 	/++
-	 + Property that returns true if the element refers to a field.
+	 + Returns true if the element refers to a field.
 	 ++/
 	@property
 	alias isField = Alias!(
@@ -63,8 +65,7 @@ struct DQueryElement(QueryType, string Name, ParamTypes...)
 	);
 
 	/++
-	 + Property that returns true if a given type matches the element's
-	 + type exactly.
+	 + Returns true if a given type matches the element's type exactly.
 	 ++/
 	@property
 	alias isTypeOf(Type) = Alias!(
@@ -74,8 +75,8 @@ struct DQueryElement(QueryType, string Name, ParamTypes...)
 	);
 
 	/++
-	 + Property that returns true if a given type can be assigned to a
-	 + variable of the element's type.
+	 + Returns true if a given type can be assigned to a variable
+	 + of the element's type.
 	 ++/
 	@property
 	alias isTypeAssignableTo(Type) = Alias!(
@@ -86,8 +87,8 @@ struct DQueryElement(QueryType, string Name, ParamTypes...)
 	);
 
 	/++
-	 + Property that returns true if a given type can be assigned from a
-	 + variable of the element's type.
+	 + Returns true if a given type can be assigned from a variable
+	 + of the element's type.
 	 ++/
 	@property
 	alias isTypeAssignableFrom(Type) = Alias!(
@@ -97,34 +98,32 @@ struct DQueryElement(QueryType, string Name, ParamTypes...)
 		})
 	);
 
-	@property
-	alias isTemplateOf(Type) = Alias!(
-		__traits(compiles, {
-			static assert(is(TemplateOf!(GetMember!(QueryType, Name)) == Type));
-		})
-	);
-
 	/++
-	 + Property that returns true if the element refers to a function.
+	 + Returns true if the element refers to a function.
 	 ++/
 	@property
 	alias isFunction = Alias!(
 		is(typeof(GetMember!(QueryType, Name)) == function)
 	);
 
+	/++
+	 + Returns true if the element refers to a constructor.
+	 ++/
 	@property
 	alias isConstructor = Alias!(
 		isFunction && isName!"__ctor"
 	);
 
+	/++
+	 + Returns true if the element refers to a destructor.
+	 ++/
 	@property
 	alias isDestructor = Alias!(
 		isFunction && isName!"__dtor"
 	);
 
 	/++
-	 + Property that return true if the element's arity matches the given
-	 + number of parameters.
+	 + Return true if the element's arity matches the given number of parameters.
 	 ++/
 	@property
 	alias isArity(int Count) = Alias!(
@@ -132,8 +131,7 @@ struct DQueryElement(QueryType, string Name, ParamTypes...)
 	);
 
 	/++
-	 + Property that returns true if a given type matches the element's
-	 + return type exactly.
+	 + Returns true if a given type matches the element's return type exactly.
 	 ++/
 	@property
 	alias isReturnTypeOf(Type) = Alias!(
@@ -143,8 +141,8 @@ struct DQueryElement(QueryType, string Name, ParamTypes...)
 	);
 
 	/++
-	 + Property that returns true if a given type can be assigned to a
-	 + variable of the element's return type.
+	 + Returns true if a given type can be assigned to a variable of the
+	 + element's return type.
 	 ++/
 	@property
 	alias isReturnAssignableTo(Type) = Alias!(
@@ -155,8 +153,8 @@ struct DQueryElement(QueryType, string Name, ParamTypes...)
 	);
 
 	/++
-	 + Property that returns true if a given type can be assigned from a
-	 + variable of the element's return type.
+	 + Returns true if a given type can be assigned from a variable
+	 + of the element's return type.
 	 ++/
 	@property
 	alias isReturnAssignableFrom(Type) = Alias!(
@@ -166,13 +164,16 @@ struct DQueryElement(QueryType, string Name, ParamTypes...)
 		})
 	);
 
+	/++
+	 + Returns true if the element's parameter types match the given type list.
+	 ++/
 	@property
 	alias isParameterTypesOf(TList...) = Alias!(
 		isFunction && Compare!(ParamTypes).With!(TList)
 	);
 
 	/++
-	 + Property that returns true if the element refers to an aggregate type.
+	 + Returns true if the element refers to an aggregate type.
 	 ++/
 	@property
 	alias isAggregate = Alias!(
@@ -182,8 +183,7 @@ struct DQueryElement(QueryType, string Name, ParamTypes...)
 	);
 
 	/++
-	 + Property that returns true if a given type matches the element's
-	 + aggregate type exactly.
+	 + Returns true if a given type matches the element's aggregate type exactly.
 	 ++/
 	@property
 	alias isAggregateTypeOf(Type) = Alias!(
@@ -193,8 +193,8 @@ struct DQueryElement(QueryType, string Name, ParamTypes...)
 	);
 
 	/++
-	 + Property that returns true if a given type can be assigned to a
-	 + variable of the element's aggregate type.
+	 + Returns true if a given type can be assigned to a variable of the
+	 + element's aggregate type.
 	 ++/
 	@property
 	alias isAggregateAssignableTo(Type) = Alias!(
@@ -205,8 +205,8 @@ struct DQueryElement(QueryType, string Name, ParamTypes...)
 	);
 
 	/++
-	 + Property that returns true if a given type can be assigned from a
-	 + variable of the element's aggregate type.
+	 + Returns true if a given type can be assigned from a variable of the
+	 + element's aggregate type.
 	 ++/
 	@property
 	alias isAggregateAssignableFrom(Type) = Alias!(
@@ -217,7 +217,7 @@ struct DQueryElement(QueryType, string Name, ParamTypes...)
 	);
 
 	/++
-	 + Property that returns true if the element refers to a class.
+	 + Returns true if the element refers to a class.
 	 ++/
 	@property
 	alias isClass = Alias!(
@@ -228,7 +228,7 @@ struct DQueryElement(QueryType, string Name, ParamTypes...)
 	);
 
 	/++
-	 + Property that returns true if the element refers to a struct.
+	 + Returns true if the element refers to a struct.
 	 ++/
 	@property
 	alias isStruct = Alias!(
@@ -238,6 +238,9 @@ struct DQueryElement(QueryType, string Name, ParamTypes...)
 		})
 	);
 
+	/++
+	 + Returns true is the element is a template of the given type.
+	 ++/
 	@property
 	alias isTemplateOf(alias Template) = Alias!(
 		__traits(compiles, {
@@ -246,6 +249,9 @@ struct DQueryElement(QueryType, string Name, ParamTypes...)
 		})
 	);
 
+	/++
+	 + Returns true if the element's template arguments match.
+	 ++/
 	@property
 	alias isTemplateArgsOf(TemplateArgs...) = Alias!(
 		__traits(compiles, {
@@ -254,6 +260,9 @@ struct DQueryElement(QueryType, string Name, ParamTypes...)
 		})
 	);
 
+	/++
+	 + Returns an uninitialized value of the element's type.
+	 ++/
 	@property
 	static auto opCall()
 	{
@@ -261,6 +270,9 @@ struct DQueryElement(QueryType, string Name, ParamTypes...)
 		return element;
 	}
 
+	/++
+	 + Returns a query for the type the element refers to.
+	 ++/
 	@property
 	static auto query()()
 	if(isAggregate)
@@ -269,6 +281,9 @@ struct DQueryElement(QueryType, string Name, ParamTypes...)
 		return query!(GetMember!(QueryType, Name));
 	}
 
+	/++
+	 + Returns a query for the parent type of the element.
+	 ++/
 	@property
 	static auto parent()()
 	{
@@ -277,7 +292,7 @@ struct DQueryElement(QueryType, string Name, ParamTypes...)
 	}
 
 	/++
-	 + Property that returns the element's attributes.
+	 + Returns the element's attributes.
 	 ++/
 	@property
 	static auto attributes()()
@@ -296,7 +311,7 @@ struct DQueryElement(QueryType, string Name, ParamTypes...)
 	}
  
 	/++
-	 + Property that returns the element's allowed attributes.
+	 + Returns the element's allowed attributes.
 	 ++/
 	@property
 	static auto attributes(Allow...)()
