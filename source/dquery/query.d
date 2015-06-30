@@ -4,6 +4,8 @@ module dquery.query;
 import std.traits;
 import std.typetuple;
 
+import dquery.attribute;
+import dquery.attributes;
 import dquery.element;
 import dquery.helper;
 
@@ -44,6 +46,52 @@ struct DQuery(QueryType, QueryElements...)
 	}
 
 	@property
+	static auto reset()()
+	{
+		alias MapToElement(string Name) = Alias!(
+			DQueryElement!(QueryType, Name)()
+		);
+
+		enum Elements = __traits(allMembers, QueryType);
+		return DQuery!(QueryType, staticMap!(MapToElement, Elements))();
+	}
+
+	/++
+	 + Property that returns the type's attributes.
+	 ++/
+	@property
+	static auto attributes()()
+	{
+		alias MapToAttribute(alias Attribute) = Alias!(
+			DQueryAttribute!Attribute()
+		);
+
+		return DQueryAttributes!(
+			QueryType,
+			staticMap!(
+				MapToAttribute,
+				GetAttributes!QueryType
+			)
+		)();
+	}
+ 
+	/++
+	 + Property that returns the type's allowed attributes.
+	 ++/
+	@property
+	static auto attributes(Allow...)()
+	if(Allow.length > 0)
+	{
+		return attributes.allow!Allow;
+	}
+
+	@property
+	static auto name(string Name)()
+	{
+		return names!Name;
+	}
+
+	@property
 	static auto names(Names...)()
 	{
 		template NameFilter(alias Name)
@@ -54,7 +102,15 @@ struct DQuery(QueryType, QueryElements...)
 		}
 
 		auto query = DQuery!(QueryType, QueryElements)();
-		return query.filter!(templateOr!(staticMap!(NameFilter, Names)));
+
+		static if(query.length > 0)
+		{
+			return query.filter!(templateOr!(staticMap!(NameFilter, Names)));
+		}
+		else
+		{
+			return query;
+		}
 	}
 
 	@property
@@ -68,7 +124,15 @@ struct DQuery(QueryType, QueryElements...)
 		}
 
 		auto query = DQuery!(QueryType, QueryElements)();
-		return query.filter!(templateOr!(staticMap!(TypeFilter, Types)));
+
+		static if(query.length > 0)
+		{
+			return query.filter!(templateOr!(staticMap!(TypeFilter, Types)));
+		}
+		else
+		{
+			return query;
+		}
 	}
 
 	@property
@@ -82,7 +146,21 @@ struct DQuery(QueryType, QueryElements...)
 		}
 
 		auto query = DQuery!(QueryType, QueryElements)();
-		return query.filter!(templateOr!(staticMap!(ReturnFilter, Types)));
+
+		static if(query.length > 0)
+		{
+			return query.filter!(templateOr!(staticMap!(ReturnFilter, Types)));
+		}
+		else
+		{
+			return qeury;
+		}
+	}
+
+	@property
+	static auto arity(int Arity)()
+	{
+		return arities!Arity;
 	}
 
 	@property
@@ -96,7 +174,15 @@ struct DQuery(QueryType, QueryElements...)
 		}
 
 		auto query = DQuery!(QueryType, QueryElements)();
-		return query.filter!(templateOr!(staticMap!(ArityFilter, Arities)));
+
+		static if(query.length > 0)
+		{
+			return query.filter!(templateOr!(staticMap!(ArityFilter, Arities)));
+		}
+		else
+		{
+			return query;
+		}
 	}
 
 	@property
@@ -110,7 +196,15 @@ struct DQuery(QueryType, QueryElements...)
 		}
 
 		auto query = DQuery!(QueryType, QueryElements)();
-		return query.filter!(templateOr!(staticMap!(AllowFilter, Attributes)));
+
+		static if(query.length > 0)
+		{
+			return query.filter!(templateOr!(staticMap!(AllowFilter, Attributes)));
+		}
+		else
+		{
+			return query;
+		}
 	}
 
 	@property
@@ -124,7 +218,15 @@ struct DQuery(QueryType, QueryElements...)
 		}
 
 		auto query = DQuery!(QueryType, QueryElements)();
-		return query.filter!(templateAnd!(staticMap!(ForbidFilter, Attributes)));
+
+		static if(query.length > 0)
+		{
+			return query.filter!(templateAnd!(staticMap!(ForbidFilter, Attributes)));
+		}
+		else
+		{
+			return query;
+		}
 	}
 
 	@property
@@ -138,7 +240,54 @@ struct DQuery(QueryType, QueryElements...)
 		}
 
 		auto query = DQuery!(QueryType, QueryElements)();
-		return query.filter!(templateAnd!(staticMap!(RequireFilter, Attributes)));
+
+		static if(query.length > 0)
+		{
+			return query.filter!(templateAnd!(staticMap!(RequireFilter, Attributes)));
+		}
+		else
+		{
+			return query;
+		}
+	}
+
+	@property
+	template ensure(string Attr)
+	if(Attr == "length")
+	{
+		import std.conv : text;
+
+		@property
+		static auto minimum(size_t Min,
+			string Message = "Length cannot be less than " ~ Min.text)()
+		{
+			static assert(length >= Min, Message);
+			return DQuery!(QueryType, QueryElements)();
+		}
+
+		@property
+		static auto maximum(size_t Max,
+			string Message = "Length cannot be greater than " ~ Max.text)()
+		{
+			static assert(length <= Max, Message);
+			return DQuery!(QueryType, QueryElements)();
+		}
+
+		@property
+		static auto between(size_t Min, size_t Max,
+			string Message = "Length must be between " ~ Min.text ~ " and " ~ Max.text)()
+		{
+			static assert(length >= Min && length <= Max, Message);
+			return DQuery!(QueryType, QueryElements)();
+		}
+
+		@property
+		static auto exactly(size_t Length,
+			string Message = "Length must be exactly " ~ Length.text)()
+		{
+			static assert(length == Length, Message);
+			return DQuery!(QueryType, QueryElements)();
+		}
 	}
 
 	@property
@@ -146,6 +295,13 @@ struct DQuery(QueryType, QueryElements...)
 	{
 		auto query = DQuery!(QueryType, QueryElements)();
 		return query.filter!(f => f.isField);
+	}
+
+	@property
+	static auto fields(Names...)()
+	if(Names.length > 0)
+	{
+		return fields.names!Names;
 	}
 
 	/++
@@ -159,10 +315,24 @@ struct DQuery(QueryType, QueryElements...)
 	}
 
 	@property
+	static auto functions(Names...)()
+	if(Names.length > 0)
+	{
+		return functions.names!Names;
+	}
+
+	@property
 	static auto aggregates()()
 	{
 		auto query = DQuery!(QueryType, QueryElements)();
 		return query.filter!(f => f.isAggregate);
+	}
+
+	@property
+	static auto aggregates(Names...)()
+	if(Names.length > 0)
+	{
+		return aggregates.names!Names;
 	}
 
 }
