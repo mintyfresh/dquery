@@ -39,6 +39,14 @@ struct DQuery(QueryType, QueryElements...)
 	alias length = Alias!(elements.length);
 
 	/++
+	 + Returns the query with all duplicate elements removed.
+	 ++/
+	@property
+	alias unique = Alias!(
+		DQuery!(QueryType, NoDuplicates!QueryElements)()
+	);
+
+	/++
 	 + Return an uninitialized value of the query's type.
 	 ++/
 	@property
