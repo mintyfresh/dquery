@@ -37,7 +37,7 @@ struct DQueryElement(QueryType, string Name)
 	 ++/
 	@property
 	alias hasAttribute(Type) = Alias!(
-		attributes.allow!Type.length > 0
+		attributes.anyOf!Type.length > 0
 	);
 
 	/++

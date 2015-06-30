@@ -100,12 +100,12 @@ unittest
 			static assert(!element.hasAttribute!None);
 
 			// Should not have nonexistent elements.
-			static assert(element.attributes.allow!None.empty);
+			static assert(element.attributes.anyOf!None.empty);
 
-			// Should not have forbidden elements.
-			static assert(element.attributes.forbid!(Attr, Limit).empty);
+			// Should not have noneOfden elements.
+			static assert(element.attributes.noneOf!(Attr, Limit).empty);
 
-			foreach(attribute; element.attributes.allow!Attr)
+			foreach(attribute; element.attributes.anyOf!Attr)
 			{
 				// Should be a type attribute.
 				static assert(attribute.isType);
@@ -132,7 +132,7 @@ unittest
 				static assert(!attribute.isTypeAssignableFrom!None);
 			}
 
-			foreach(attribute; element.attributes.allow!Limit)
+			foreach(attribute; element.attributes.anyOf!Limit)
 			{
 				// Should be a type attribute.
 				static assert(!attribute.isType);
@@ -171,13 +171,13 @@ unittest
 			static assert(!element.hasAttribute!None);
 
 			// Should not have nonexistent elements.
-			static assert(element.attributes.allow!None.empty);
+			static assert(element.attributes.anyOf!None.empty);
 
-			// Should not have allowed but nonexistent elements.
-			static assert(element.attributes.allow!(Attr, Limit).empty);
+			// Should not have anyOfed but nonexistent elements.
+			static assert(element.attributes.anyOf!(Attr, Limit).empty);
 
-			// Should not have forbidden elements.
-			static assert(element.attributes.forbid!(Attr, Limit).empty);
+			// Should not have noneOfden elements.
+			static assert(element.attributes.noneOf!(Attr, Limit).empty);
 		}
 
 		// Should have public protection.
@@ -249,21 +249,21 @@ unittest
 		);
 	}
 
-	auto allowedFields = fields.allow!Attr;
+	auto anyOfedFields = fields.anyOf!Attr;
 
 	// Should match parent type.
-	static assert(is(allowedFields.type == fields.type));
+	static assert(is(anyOfedFields.type == fields.type));
 
 	// Should not be empty.
-	static assert(!allowedFields.empty);
+	static assert(!anyOfedFields.empty);
 
 	// Should have 3 elements.
-	static assert(allowedFields.length == 3);
+	static assert(anyOfedFields.length == 3);
 
-	foreach(element; allowedFields)
+	foreach(element; anyOfedFields)
 	{
 		// Should match parent type.
-		static assert(is(element.type == allowedFields.type));
+		static assert(is(element.type == anyOfedFields.type));
 
 		// Should not be field tmp.
 		static assert(!element.isName!"tmp");
@@ -272,21 +272,21 @@ unittest
 		static assert(element.hasAttribute!Attr);
 	}
 
-	auto forbiddenFields = fields.forbid!Limit;
+	auto noneOfdenFields = fields.noneOf!Limit;
 
 	// Should match parent type.
-	static assert(is(forbiddenFields.type == fields.type));
+	static assert(is(noneOfdenFields.type == fields.type));
 
 	// Should not be empty.
-	static assert(!forbiddenFields.empty);
+	static assert(!noneOfdenFields.empty);
 
 	// Should have 1 element.
-	static assert(forbiddenFields.length == 1);
+	static assert(noneOfdenFields.length == 1);
 
-	foreach(element; forbiddenFields)
+	foreach(element; noneOfdenFields)
 	{
 		// Should match parent type.
-		static assert(is(element.type == forbiddenFields.type));
+		static assert(is(element.type == noneOfdenFields.type));
 
 		// Should be field tmp.
 		static assert(element.isName!"tmp");
@@ -321,10 +321,10 @@ unittest
 		static assert(!element.hasAttribute!None);
 
 		// Should not have nonexistent elements.
-		static assert(element.attributes.allow!None.empty);
+		static assert(element.attributes.anyOf!None.empty);
 
-		// Should not have forbidden elements.
-		static assert(element.attributes.forbid!(Attr, Limit).empty);
+		// Should not have noneOfden elements.
+		static assert(element.attributes.noneOf!(Attr, Limit).empty);
 
 		// Should have public protection.
 		static assert(element.protection == "public");
@@ -464,10 +464,10 @@ unittest
 		static assert(!element.hasAttribute!None);
 
 		// Should not have nonexistent elements.
-		static assert(element.attributes.allow!None.empty);
+		static assert(element.attributes.anyOf!None.empty);
 
-		// Should not have forbidden elements.
-		static assert(element.attributes.forbid!(Attr, Limit).empty);
+		// Should not have noneOfden elements.
+		static assert(element.attributes.noneOf!(Attr, Limit).empty);
 
 		// Should have private protection.
 		static assert(element.protection == "private");
