@@ -45,6 +45,11 @@ version(unittest)
 			this.z = z;
 		}
 
+		void reset()
+		{
+			x = y = z = 0;
+		}
+
 		int[3] getCoords()
 		{
 			return [x, y, z];
@@ -64,8 +69,8 @@ unittest
 	// Should not be empty.
 	static assert(!query.empty);
 
-	// Should have 9 elements.
-	static assert(query.length == 9);
+	// Should have 10 elements.
+	static assert(query.length == 10);
 
 	auto fields = query.fields;
 
@@ -298,8 +303,8 @@ unittest
 	// Should not be empty.
 	static assert(!functions.empty);
 
-	// Should have 2 elements.
-	static assert(functions.length == 2);
+	// Should have 3 elements.
+	static assert(functions.length == 3);
 
 	foreach(element; functions)
 	{
@@ -370,6 +375,32 @@ unittest
 
 			// Should return a Coord.
 			static assert(element.isReturnTypeOf!Coord);
+		}
+		else static if(element.isName!"reset")
+		{
+			// Should have arity 0.
+			static assert(element.isArity!0);
+			
+			// Should not have arity 3.
+			static assert(!element.isArity!3);
+
+			// Should have parameters ().
+			static assert(element.isParameterTypesOf!());
+
+			// Should not have parameters (int).
+			static assert(!element.isParameterTypesOf!(int));
+
+			// Should not have parameters (int, int, int).
+			static assert(!element.isParameterTypesOf!(int, int, int));
+
+			// Should not return an int.
+			static assert(!element.isReturnTypeOf!int);
+
+			// Should not return an int array.
+			static assert(!element.isReturnTypeOf!(int[3]));
+
+			// Should return void.
+			static assert(element.isReturnTypeOf!void);
 		}
 		else static if(element.isName!"getCoords")
 		{
