@@ -104,6 +104,13 @@ struct DQueryAttribute(alias Attribute)
 		return attribute;
 	}
 
+	@property
+	static auto query()()
+	{
+		import dquery.d;
+		return query!type;
+	}
+
 	string toString()
 	{
 		return Attribute.stringof;
