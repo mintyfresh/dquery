@@ -411,6 +411,18 @@ struct DQuery(QueryType, QueryElements...)
 		return aggregates.names!Names;
 	}
 
+	/++
+	 + Returns a union between this query and another one.
+	 +
+	 + Params:
+	 +     query = The other query being joined with this one.
+	 ++/
+	@property
+	static auto join(OType, OElements...)(DQuery!(OType, OElements) query)
+	{
+		return DQuery!(QueryType, TypeTuple!(QueryElements, OElements))();
+	}
+
 }
 
 template map(alias Pred)
