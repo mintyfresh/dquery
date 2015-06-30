@@ -8,10 +8,6 @@ import dquery.attribute;
 import dquery.attributes;
 import dquery.helper;
 
-alias MapToAttribute(alias Attribute) = Alias!(
-	DQueryAttribute!Attribute()
-);
-
 struct DQueryElement(QueryType, string Name)
 {
 
@@ -233,12 +229,32 @@ struct DQueryElement(QueryType, string Name)
 		})
 	);
 
+	@property
+	alias isTemplateOf(alias Template) = Alias!(
+		__traits(compiles, {
+			alias Element = Alias!(GetMember!(QueryType, Name));
+			static assert(is(TemplateOf!Element == Template));
+		})
+	);
+
+	@property
+	alias isTemplateArgsOf(TemplateArgs...) = Alias!(
+		__traits(compiles, {
+			alias Element = Alias!(GetMember!(QueryType, Name));
+			static assert(Compare!(TemplateArgsOf!Element).With!TemplateArgs);
+		})
+	);
+
 	/++
 	 + Property that returns the element's attributes.
 	 ++/
 	@property
 	static auto attributes()()
 	{
+		alias MapToAttribute(alias Attribute) = Alias!(
+			DQueryAttribute!Attribute()
+		);
+
 		return DQueryAttributes!(
 			QueryType,
 			staticMap!(
@@ -253,6 +269,7 @@ struct DQueryElement(QueryType, string Name)
 	 ++/
 	@property
 	static auto attributes(Allow...)()
+	if(Allow.length > 0)
 	{
 		return attributes.allow!Allow;
 	}

@@ -44,6 +44,28 @@ struct DQueryAttributes(QueryType, Attributes...)
 		DQueryAttributes!(QueryType, NoDuplicates!Attributes)()
 	);
 
+	@property
+	static auto opCall()
+	{
+		DQueryAttributes!(QueryType, Attributes) attributes = void;
+		return attributes;
+	}
+
+	@property
+	static auto parent()()
+	{
+		import dquery.query;
+		import dquery.element;
+
+		enum QueryElements = __traits(allMembers, QueryType);
+
+		alias MapToElement(string Name) = Alias!(
+			DQueryElement!(QueryType, Name)()
+		);
+
+		return DQuery!(QueryType, staticMap!(MapToElement, QueryElements))();
+	}
+
 	/++
 	 + Property that returns a subset of the list of attributes
 	 + which match at least one of the given types.
@@ -56,7 +78,7 @@ struct DQueryAttributes(QueryType, Attributes...)
 			UnaryToPred!(attribute => attribute.isTypeOf!Type)
 		);
 
-		DQueryAttributes!(QueryType, Attributes) query = void;
+		auto query = DQueryAttributes!(QueryType, Attributes)();
 
 		static if(Attributes.length > 0)
 		{
@@ -81,7 +103,7 @@ struct DQueryAttributes(QueryType, Attributes...)
 			UnaryToPred!(attribute => !attribute.isTypeOf!Type)
 		);
 
-		DQueryAttributes!(QueryType, Attributes) query = void;
+		auto query = DQueryAttributes!(QueryType, Attributes)();
 
 		static if(Attributes.length > 0)
 		{
@@ -95,10 +117,42 @@ struct DQueryAttributes(QueryType, Attributes...)
 	}
 
 	@property
-	static auto opCall()
+	template ensure(string Attr)
+	if(Attr == "length")
 	{
-		DQueryAttributes!(QueryType, Attributes) attributes = void;
-		return attributes;
+		import std.conv : text;
+
+		@property
+		static auto minimum(size_t Min,
+			string Message = "Length cannot be less than " ~ Min.text)()
+		{
+			static assert(length >= Min, Message);
+			return DQueryAttributes!(QueryType, Attributes)();
+		}
+
+		@property
+		static auto maximum(size_t Max,
+			string Message = "Length cannot be greater than " ~ Max.text)()
+		{
+			static assert(length <= Max, Message);
+			return DQueryAttributes!(QueryType, Attributes)();
+		}
+
+		@property
+		static auto between(size_t Min, size_t Max,
+			string Message = "Length must be between " ~ Min.text ~ " and " ~ Max.text)()
+		{
+			static assert(length >= Min && length <= Max, Message);
+			return DQueryAttributes!(QueryType, Attributes)();
+		}
+
+		@property
+		static auto exactly(size_t Length,
+			string Message = "Length must be exactly " ~ Length.text)()
+		{
+			static assert(length == Length, Message);
+			return DQueryAttributes!(QueryType, Attributes)();
+		}
 	}
 
 }
