@@ -12,23 +12,11 @@ struct DQueryAttribute(alias Attribute)
 	@property
 	alias attribute = Attribute;
 
-	// Determine how to get the type.
-	static if(isExpression)
-	{
-		/++
-		 + Property that returns the type of the attribute.
-		 ++/
-		@property
-		alias type = typeof(Attribute);
-	}
-	else
-	{
-		/++
-		 + Property that returns the type of the attribute.
-		 ++/
-		@property
-		alias type = Attribute;
-	}
+	/++
+	 + Property that returns the value of the attribute.
+	 ++/
+	@property
+	alias get = Attribute;
 
 	/++
 	 + Proprety that returns true if the attribute is a type.
@@ -45,6 +33,36 @@ struct DQueryAttribute(alias Attribute)
 	alias isExpression = Alias!(
 		is(typeof(Attribute))
 	);
+
+	// Determine how to get the type.
+	static if(isExpression)
+	{
+		/++
+		 + Property that returns the type of the attribute.
+		 ++/
+		@property
+		alias type = typeof(Attribute);
+
+		/++
+		 + Property that returns the value of the attribute, or a default.
+		 ++/
+		@property
+		alias value(alias Default) = Attribute;
+	}
+	else
+	{
+		/++
+		 + Property that returns the type of the attribute.
+		 ++/
+		@property
+		alias type = Attribute;
+
+		/++
+		 + Property that returns the value of the attribute, or a default.
+		 ++/
+		@property
+		alias value(alias Default) = Default;
+	}
 
 	/++
 	 + Property that returns true if a given type matches the attribute's
