@@ -38,6 +38,8 @@ version(unittest)
 
 		int tmp;
 
+		@disable this();
+
 		this(int x, int y, int z)
 		{
 			this.x = x;
@@ -69,8 +71,8 @@ unittest
 	// Should not be empty.
 	static assert(!query.empty);
 
-	// Should have 10 elements.
-	static assert(query.length == 10);
+	// Should have 11 elements.
+	static assert(query.length == 11);
 
 	auto fields = query.fields;
 
@@ -303,8 +305,8 @@ unittest
 	// Should not be empty.
 	static assert(!functions.empty);
 
-	// Should have 3 elements.
-	static assert(functions.length == 3);
+	// Should have 4 elements.
+	static assert(functions.length == 4);
 
 	foreach(element; functions)
 	{
@@ -355,26 +357,44 @@ unittest
 
 		static if(element.isName!"__ctor")
 		{
-			// Should not have arity 0.
-			static assert(!element.isArity!0);
-			
-			// Should have arity 3.
-			static assert(element.isArity!3);
+			static if(element.isArity!0)
+			{
+				// Should have parameters ().
+				static assert(element.isParameterTypesOf!());
 
-			// Should not have parameters ().
-			static assert(!element.isParameterTypesOf!());
+				// Should not have parameters (int).
+				static assert(!element.isParameterTypesOf!(int));
 
-			// Should not have parameters (int).
-			static assert(!element.isParameterTypesOf!(int));
+				// Should not have parameters (int, int, int).
+				static assert(!element.isParameterTypesOf!(int, int, int));
 
-			// Should have parameters (int, int, int).
-			static assert(element.isParameterTypesOf!(int, int, int));
+				// Should not return an int.
+				static assert(!element.isReturnTypeOf!int);
 
-			// Should not return an int.
-			static assert(!element.isReturnTypeOf!int);
+				// Should return a Coord.
+				static assert(element.isReturnTypeOf!Coord);
+			}
+			else static if(element.isArity!3)
+			{
+				// Should not have parameters ().
+				static assert(!element.isParameterTypesOf!());
 
-			// Should return a Coord.
-			static assert(element.isReturnTypeOf!Coord);
+				// Should not have parameters (int).
+				static assert(!element.isParameterTypesOf!(int));
+
+				// Should have parameters (int, int, int).
+				static assert(element.isParameterTypesOf!(int, int, int));
+
+				// Should not return an int.
+				static assert(!element.isReturnTypeOf!int);
+
+				// Should return a Coord.
+				static assert(element.isReturnTypeOf!Coord);
+			}
+			else
+			{
+				static assert(0);
+			}
 		}
 		else static if(element.isName!"reset")
 		{
