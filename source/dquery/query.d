@@ -220,7 +220,15 @@ struct DQuery(QueryType, QueryElements...)
 	static auto parameters(Parameters...)()
 	{
 		auto query = DQuery!(QueryType, QueryElements)();
-		return query.filter!(f => f.isParameterTypesOf!Parameters);
+
+		static if(query.length > 0)
+		{
+			return query.filter!(f => f.isParameterTypesOf!Parameters);
+		}
+		else
+		{
+			return query;
+		}
 	}
 
 	/++
@@ -346,7 +354,15 @@ struct DQuery(QueryType, QueryElements...)
 	static auto fields()()
 	{
 		auto query = DQuery!(QueryType, QueryElements)();
-		return query.filter!(f => f.isField);
+
+		static if(query.length > 0)
+		{
+			return query.filter!(f => f.isField);
+		}
+		else
+		{
+			return query;
+		}
 	}
 
 	/++
@@ -366,7 +382,15 @@ struct DQuery(QueryType, QueryElements...)
 	static auto functions()()
 	{
 		auto query = DQuery!(QueryType, QueryElements)();
-		return query.filter!(f => f.isFunction);
+
+		static if(query.length > 0)
+		{
+			return query.filter!(f => f.isFunction);
+		}
+		else
+		{
+			return query;
+		}
 	}
 
 	/++
@@ -386,7 +410,15 @@ struct DQuery(QueryType, QueryElements...)
 	static auto constructors()()
 	{
 		auto query = DQuery!(QueryType, QueryElements)();
-		return query.filter!(f => f.isConstructor);
+
+		static if(query.length > 0)
+		{
+			return query.filter!(f => f.isConstructor);
+		}
+		else
+		{
+			return query;
+		}
 	}
 
 	/++
@@ -396,7 +428,15 @@ struct DQuery(QueryType, QueryElements...)
 	static auto destructors()()
 	{
 		auto query = DQuery!(QueryType, QueryElements)();
-		return query.filter!(f => f.isDestructor);
+
+		static if(query.length > 0)
+		{
+			return query.filter!(f => f.isDestructor);
+		}
+		else
+		{
+			return query;
+		}
 	}
 
 	/++
@@ -406,7 +446,15 @@ struct DQuery(QueryType, QueryElements...)
 	static auto aggregates()()
 	{
 		auto query = DQuery!(QueryType, QueryElements)();
-		return query.filter!(f => f.isAggregate);
+
+		static if(query.length > 0)
+		{
+			return query.filter!(f => f.isAggregate);
+		}
+		else
+		{
+			return query;
+		}
 	}
 
 	/++
@@ -433,34 +481,213 @@ struct DQuery(QueryType, QueryElements...)
 
 }
 
-template map(alias Pred)
+/++
+ + Tests if all elements in a query satisfy a predicate template or function.
+ ++/
+template all(alias Pred)
 {
 	@property
-	auto map(QueryType, QueryElements...)(DQuery!(QueryType, QueryElements) query)
+	bool all(QueryType, QueryElements...)(DQuery!(QueryType, QueryElements) query)
+	if(QueryElements.length == 0)
+	{
+		return true;
+	}
+
+	@property
+	bool all(QueryType, QueryElements...)(DQuery!(QueryType, QueryElements) query)
+	if(QueryElements.length > 0 && __traits(compiles, {
+		foreach(Element; QueryElements)
+		{
+			if(!Pred(Element))
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}))
+	{
+		foreach(Element; QueryElements)
+		{
+			if(!Pred(Element))
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	@property
+	bool all(QueryType, QueryElements...)(DQuery!(QueryType, QueryElements) query)
+	if(QueryElements.length > 0 && __traits(compiles, {
+		foreach(Element; QueryElements)
+		{
+			static if(!Pred!(Element))
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}))
+	{
+		foreach(Element; QueryElements)
+		{
+			static if(!Pred!(Element))
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+}
+
+/++
+ + Tests if any elements in a query statisfy a template predicate or function.
+ ++/
+template any(alias Pred)
+{
+	@property
+	bool any(QueryType, QueryElements...)(DQuery!(QueryType, QueryElements) query)
+	if(QueryElements.length == 0)
+	{
+		return true;
+	}
+
+	@property
+	bool any(QueryType, QueryElements...)(DQuery!(QueryType, QueryElements) query)
+	if(QueryElements.length > 0 && __traits(compiles, {
+		foreach(Element; QueryElements)
+		{
+			if(Pred(Element))
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}))
+	{
+		foreach(Element; QueryElements)
+		{
+			if(Pred(Element))
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	@property
+	bool any(QueryType, QueryElements...)(DQuery!(QueryType, QueryElements) query)
+	if(QueryElements.length > 0 && __traits(compiles, {
+		foreach(Element; QueryElements)
+		{
+			if(Pred!(Element))
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}))
+	{
+		foreach(Element; QueryElements)
+		{
+			if(Pred!(Element))
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+}
+
+/++
+ + Iterates over elements in a query using a unary template or function.
+ ++/
+template each(alias Pred)
+{
+	@property
+	auto each(QueryType, QueryElements...)(DQuery!(QueryType, QueryElements) query)
 	if(QueryElements.length == 0)
 	{
 		return query;
 	}
 
 	@property
-	auto map(QueryType, QueryElements...)(DQuery!(QueryType, QueryElements) query)
+	auto each(QueryType, QueryElements...)(DQuery!(QueryType, QueryElements) query)
 	if(QueryElements.length > 0 && __traits(compiles, {
-		return DQuery!(QueryType, staticMap!(UnaryToPred!Pred, QueryElements))();
+		foreach(element; QueryElements)
+		{
+			Pred(element);
+		}
 	}))
 	{
-		return DQuery!(QueryType, staticMap!(UnaryToPred!Pred, QueryElements))();
+		foreach(element; QueryElements)
+		{
+			Pred(element);
+		}
+		
+		return query;
+	}
+
+	@property
+	auto each(QueryType, QueryElements...)(DQuery!(QueryType, QueryElements) query)
+	if(QueryElements.length > 0 && __traits(compiles, {
+		foreach(Element; QueryElements)
+		{
+			Pred!Element;
+		}
+	}))
+	{
+		foreach(Element; QueryElements)
+		{
+			Pred!Element;
+		}
+		
+		return query;
+	}
+}
+
+/++
+ + Applies a map transformation to a query using a unary template or function.
+ ++/
+template map(alias Pred)
+{
+	@property
+	auto map(QueryType, QueryElements...)(DQuery!(QueryType, QueryElements) query)
+	if(QueryElements.length == 0)
+	{
+		return [];
 	}
 
 	@property
 	auto map(QueryType, QueryElements...)(DQuery!(QueryType, QueryElements) query)
 	if(QueryElements.length > 0 && __traits(compiles, {
-		return DQuery!(QueryType, staticMap!(Pred, QueryElements))();
+		return [staticMap!(UnaryToPred!Pred, QueryElements)];
 	}))
 	{
-		return DQuery!(QueryType, staticMap!(Pred, QueryElements))();
+		return [staticMap!(UnaryToPred!Pred, QueryElements)];
+	}
+
+	@property
+	auto map(QueryType, QueryElements...)(DQuery!(QueryType, QueryElements) query)
+	if(QueryElements.length > 0 && __traits(compiles, {
+		return [staticMap!(Pred, QueryElements)];
+	}))
+	{
+		return [staticMap!(Pred, QueryElements)];
 	}
 }
 
+/++
+ + Applies a filter transformation to a query using a unary template or function.
+ ++/
 template filter(alias Pred)
 {
 	@property
