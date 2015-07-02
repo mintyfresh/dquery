@@ -486,6 +486,9 @@ struct DQuery(QueryType, QueryElements...)
  ++/
 template all(alias Pred)
 {
+	/++
+	 + An empty query always produces true.
+	 ++/
 	@property
 	bool all(QueryType, QueryElements...)(DQuery!(QueryType, QueryElements) query)
 	if(QueryElements.length == 0)
@@ -549,6 +552,9 @@ template all(alias Pred)
  ++/
 template any(alias Pred)
 {
+	/++
+	 + An empty query always produces true.
+	 ++/
 	@property
 	bool any(QueryType, QueryElements...)(DQuery!(QueryType, QueryElements) query)
 	if(QueryElements.length == 0)
