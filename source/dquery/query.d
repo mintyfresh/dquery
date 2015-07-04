@@ -67,6 +67,30 @@ struct DQuery(QueryType, QueryElements...)
 	}
 
 	/++
+	 + Returns the first element in the query.
+	 ++/
+	@property
+	static auto first()()
+	if(!empty)
+	{
+		return QueryElements[0];
+	}
+
+	@property
+	static auto firstOr(alias Fallback)()
+	if(!is(typeof(Fallback) == void))
+	{
+		static if(!empty)
+		{
+			return QueryElements[0];
+		}
+		else
+		{
+			return Fallback;
+		}
+	}
+
+	/++
 	 + Returns the type's attributes.
 	 ++/
 	@property
