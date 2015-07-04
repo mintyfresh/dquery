@@ -70,7 +70,7 @@ struct DQueryAttributes(QueryType, Attributes...)
 	static auto first()()
 	if(!empty)
 	{
-		return attributes[0];
+		return Attributes[0];
 	}
 
 	/++
@@ -82,7 +82,7 @@ struct DQueryAttributes(QueryType, Attributes...)
 	{
 		static if(!empty)
 		{
-			return attributes[0];
+			return Attributes[0];
 		}
 		else
 		{
