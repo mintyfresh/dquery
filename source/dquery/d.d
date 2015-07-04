@@ -21,8 +21,13 @@ auto query(QueryType)()
 {
 	template MapToElement(string Name)
 	{
+		// Check for inaccessible members; we can only skip them.
+		static if(!__traits(compiles, GetMember!(QueryType, Name)))
+		{
+			alias MapToElement = TypeTuple!();
+		}
 		// Check for functions; each overload is kept as an element.
-		static if(is(typeof(GetMember!(QueryType, Name)) == function))
+		else static if(is(typeof(GetMember!(QueryType, Name)) == function))
 		{
 			alias MapToOverload(alias Overload) = Alias!(
 				DQueryElement!(
@@ -36,6 +41,7 @@ auto query(QueryType)()
 				MapToOverload, __traits(getOverloads, QueryType, Name)
 			);
 		}
+		// Normal members.
 		else
 		{
 			alias MapToElement = Alias!(DQueryElement!(QueryType, Name)());
