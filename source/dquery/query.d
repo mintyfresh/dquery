@@ -96,6 +96,36 @@ struct DQuery(QueryType, QueryElements...)
 	}
 
 	/++
+	 + Returns true if the type has all of the given attributes.
+	 ++/
+	@property
+	static auto hasAllOf(TList...)()
+	if(TList.length > 0)
+	{
+		return attributes.hasAllOf!TList;
+	}
+
+	/++
+	 + Returns true if the type has any of the given attributes.
+	 ++/
+	@property
+	static auto hasAnyOf(TList...)()
+	if(TList.length > 0)
+	{
+		return attributes.hasAnyOf!TList;
+	}
+
+	/++
+	 + Returns true if the type has none of the given attributes.
+	 ++/
+	@property
+	static auto hasNoneOf(TList...)()
+	if(TList.length > 0)
+	{
+		return attributes.hasNoneOf!TList;
+	}
+
+	/++
 	 + Filters elements that match the given name.
 	 ++/
 	@property

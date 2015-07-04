@@ -40,6 +40,30 @@ struct DQueryElement(QueryType, string Name, alias Overload = null)
 	);
 
 	/++
+	 + Returns true if the element has all of the given attributes.
+	 ++/
+	@property
+	alias hasAllOf(TList...) = Alias!(
+		attributes.hasAllOf!TList
+	);
+
+	/++
+	 + Returns true if the element has any of the given attributes.
+	 ++/
+	@property
+	alias hasAnyOf(TList...) = Alias!(
+		attributes.hasAnyOf!TList
+	);
+
+	/++
+	 + Returns true if the element has none of the given attributes.
+	 ++/
+	@property
+	alias hasNoneOf(TList...) = Alias!(
+		attributes.hasNoneOf!TList
+	);
+
+	/++
 	 + Returns the element's access protection.
 	 ++/
 	@property
