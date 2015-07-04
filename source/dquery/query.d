@@ -116,7 +116,7 @@ struct DQuery(QueryType, QueryElements...)
 	static auto attributes(Allow...)()
 	if(Allow.length > 0)
 	{
-		return attributes.allow!Allow;
+		return attributes.anyOf!Allow;
 	}
 
 	/++
