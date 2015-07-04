@@ -64,6 +64,47 @@ struct DQueryAttributes(QueryType, Attributes...)
 	}
 
 	/++
+	 + Returns true if all of the given attributes are present.
+	 ++/
+	@property
+	static auto hasAllOf(TList...)()
+	if(TList.length > 0)
+	{
+		auto query = DQueryAttributes!(QueryType, Attributes)();
+
+		static if(TList.length > 1)
+		{
+			return query.hasAnyOf!(TList[0]) && query.hasAllOf!(TList[1 .. $]);
+		}
+		else
+		{
+			return query.hasAnyOf!(TList[0]);
+		}
+	}
+
+	/++
+	 + Returns true if any of the given attributes are present.
+	 ++/
+	@property
+	static auto hasAnyOf(TList...)()
+	if(TList.length > 0)
+	{
+		auto query = DQueryAttributes!(QueryType, Attributes)();
+		return !query.anyOf!TList.empty;
+	}
+
+	/++
+	 + Returns true if none of the given attributes are present.
+	 ++/
+	@property
+	static auto hasNoneOf(TList...)()
+	if(TList.length > 0)
+	{
+		auto query = DQueryAttributes!(QueryType, Attributes)();
+		return query.anyOf!TList.empty;
+	}
+
+	/++
 	 + Returns a subset of the list of attributes which match
 	 + at least one of the given types.
 	 ++/
