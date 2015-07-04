@@ -24,6 +24,14 @@ struct DQueryElement(QueryType, string Name, alias Overload = null)
 	alias name = Name;
 
 	/++
+	 + Returns the value of the element.
+	 ++/
+	@property
+	alias value = Alias!(
+		GetMember!(QueryType, Name)
+	);
+
+	/++
 	 + Returns true if the name matches.
 	 ++/
 	@property
