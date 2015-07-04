@@ -44,10 +44,17 @@ struct DQueryAttribute(alias Attribute)
 		alias type = typeof(Attribute);
 
 		/++
+		 + Property that return the value of the attributes.
+		 + Only defined for attributes that can produce a value.
+		 ++/
+		@property
+		alias value = Attribute;
+
+		/++
 		 + Property that returns the value of the attribute, or a default.
 		 ++/
 		@property
-		alias value(alias Default) = Attribute;
+		alias valueOr(alias Default) = Attribute;
 	}
 	else
 	{
@@ -61,7 +68,7 @@ struct DQueryAttribute(alias Attribute)
 		 + Property that returns the value of the attribute, or a default.
 		 ++/
 		@property
-		alias value(alias Default) = Default;
+		alias valueOr(alias Default) = Default;
 	}
 
 	/++
