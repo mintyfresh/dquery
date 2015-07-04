@@ -64,6 +64,33 @@ struct DQueryAttributes(QueryType, Attributes...)
 	}
 
 	/++
+	 + Returns the first attribute in the query.
+	 ++/
+	@property
+	static auto first()()
+	if(!empty)
+	{
+		return attributes[0];
+	}
+
+	/++
+	 + Returns the first attribute in the query, or a fallback if empty.
+	 ++/
+	@property
+	static auto firstOr(alias Fallback)()
+	if(!is(typeof(Fallback) == void))
+	{
+		static if(!empty)
+		{
+			return attributes[0];
+		}
+		else
+		{
+			return Fallback;
+		}
+	}
+
+	/++
 	 + Returns true if all of the given attributes are present.
 	 ++/
 	@property
