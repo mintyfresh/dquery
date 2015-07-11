@@ -155,6 +155,76 @@ auto elements =
         .reset;
 ```
 
+### Transformations
+
+dquery includes a `filter!()` for custom or advanced filtering in chains.
+
+```d
+auto elements =
+    query!User
+
+        // Custom filter.
+        .filter!(element =>
+            element.isTypeOf!string ||
+            element.hasAttribute!Id
+        );
+```
+
+dquery also includes a `map!()` transform function for transforming the result of a chain.
+
+```d
+string[] names =
+    query!User
+
+        // Filter fields,
+        .fields
+
+        // That have @Id or @Column,
+        .anyOf!(Id, Column)
+
+        // Map to their names.
+        .map!(field => field.name);
+```
+
+All dquery transform functions can take a function or delegate, or a template.
+
+### Joining Results
+
+Mutliple chains can be joined together to produce even more complex queries easily.
+
+```d
+auto elements =
+    query!User
+
+        // Filter fields,
+        .fields
+
+        // That have @Id or @Column,
+        .anyOf!(Id, Column)
+
+        // And are a string,
+        .types!string
+
+        // Join with,
+        .join(
+            query!User
+
+                // Filter functions,
+                .functions
+
+                // With both @Column and @Mappable,
+                .allOf!(Column, Mappable)
+
+                // And arity 0,
+                .arity!0
+
+                // That return a string.
+                .returns!string
+        );
+```
+
+You can also use a query's `unique` property to remove any duplicate elements.
+
 ### Attributes
 
 dquery also provides functions for handling attributes attached to queried types and elements.
