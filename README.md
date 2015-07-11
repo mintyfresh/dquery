@@ -82,7 +82,7 @@ auto elements =
 
 ### Chaining Logic
 
-dquery focuses on chainable functions so that complex logic can be broken down into the sequence 
+dquery focuses on chaining so that complex logic can be broken down into simple sequences like, 
 
 ```d
 auto elements =
