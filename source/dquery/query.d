@@ -30,21 +30,19 @@ struct DQuery(QueryType, QueryElements...)
 	 + Returns true if the query has no elements.
 	 ++/
 	@property
-	alias empty = Alias!(length == 0);
+	enum empty = length == 0;
 
 	/++
 	 + Returns the number of elements in the query.
 	 ++/
 	@property
-	alias length = Alias!(elements.length);
+	enum length = elements.length;
 
 	/++
 	 + Returns the query with all duplicate elements removed.
 	 ++/
 	@property
-	alias unique = Alias!(
-		DQuery!(QueryType, NoDuplicates!QueryElements)()
-	);
+	enum unique = DQuery!(QueryType, NoDuplicates!QueryElements)();
 
 	/++
 	 + Return an uninitialized value of the query's type.
