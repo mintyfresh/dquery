@@ -182,6 +182,24 @@ struct DQuery(QueryType, QueryElements...)
 	}
 
 	/++
+	 + Filters elements that are accessible.
+	 ++/
+	@property
+	static auto accessible()()
+	{
+		auto query = DQuery!(QueryType, QueryElements)();
+
+		static if(query.length > 0)
+		{
+			return query.filter!(f => f.isAccessible);
+		}
+		else
+		{
+			return query;
+		}
+	}
+
+	/++
 	 + Filters elements that match one of the given types.
 	 ++/
 	@property

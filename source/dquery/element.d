@@ -30,7 +30,7 @@ struct DQueryElement(QueryType, string Name, alias Overload = null)
 		 + Returns true if the element is accessible.
 		 ++/
 		@property
-		enum accessible = true;
+		enum isAccessible = true;
 
 		/++
 		 + Returns the value of the element.
@@ -46,7 +46,7 @@ struct DQueryElement(QueryType, string Name, alias Overload = null)
 		 + Returns true if the element is accessible.
 		 ++/
 		@property
-		enum accessible = false;
+		enum isAccessible = false;
 
 		/++
 		 + Returns void for inaccessible elements.
@@ -294,7 +294,7 @@ struct DQueryElement(QueryType, string Name, alias Overload = null)
 	@property
 	static auto attributes()()
 	{
-		static if(accessible)
+		static if(isAccessible)
 		{
 			alias MapToAttribute(alias Attribute) = Alias!(
 				DQueryAttribute!Attribute()
