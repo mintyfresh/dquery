@@ -21,63 +21,75 @@ struct DQueryElement(QueryType, string Name, alias Overload = null)
 	 + Returns the name of the element.
 	 ++/
 	@property
-	alias name = Name;
+	enum name = Name;
 
-	/++
-	 + Returns the value of the element.
-	 ++/
-	@property
-	alias value = Alias!(
-		GetMember!(QueryType, Name)
-	);
+	// Check if the element is accessible.
+	static if(__traits(compiles, GetMember!(QueryType, Name)))
+	{
+		/++
+		 + Returns true if the element is accessible.
+		 ++/
+		@property
+		enum accessible = true;
+
+		/++
+		 + Returns the value of the element.
+		 ++/
+		@property
+		alias value = Alias!(
+			GetMember!(QueryType, Name)
+		);
+	}
+	else
+	{
+		/++
+		 + Returns true if the element is accessible.
+		 ++/
+		@property
+		enum accessible = false;
+
+		/++
+		 + Returns void for inaccessible elements.
+		 ++/
+		@property
+		alias value = Alias!(void);
+	}
 
 	/++
 	 + Returns true if the name matches.
 	 ++/
 	@property
-	alias isName(string Name) = Alias!(
-		name == Name
-	);
+	enum isName(string Name) = name == Name;
 
 	/++
 	 + Returns true if the element has an attribute of the given type.
 	 ++/
 	@property
-	alias hasAttribute(Type) = Alias!(
-		attributes.anyOf!Type.length > 0
-	);
+	enum hasAttribute(Type) = attributes.anyOf!Type.length > 0;
 
 	/++
 	 + Returns true if the element has all of the given attributes.
 	 ++/
 	@property
-	alias hasAllOf(TList...) = Alias!(
-		attributes.hasAllOf!TList
-	);
+	enum hasAllOf(TList...) = attributes.hasAllOf!TList;
 
 	/++
 	 + Returns true if the element has any of the given attributes.
 	 ++/
 	@property
-	alias hasAnyOf(TList...) = Alias!(
-		attributes.hasAnyOf!TList
-	);
+	enum hasAnyOf(TList...) = attributes.hasAnyOf!TList;
 
 	/++
 	 + Returns true if the element has none of the given attributes.
 	 ++/
 	@property
-	alias hasNoneOf(TList...) = Alias!(
-		attributes.hasNoneOf!TList
-	);
+	enum hasNoneOf(TList...) = attributes.hasNoneOf!TList;
 
 	/++
 	 + Returns the element's access protection.
 	 ++/
 	@property
-	alias protection = Alias!(
-		GetProtection!(QueryType, Name)
-	);
+	enum protection = GetProtection!(QueryType, Name);
 
 	/++
 	 + Returns true if the element refers to a field.
@@ -91,202 +103,159 @@ struct DQueryElement(QueryType, string Name, alias Overload = null)
 	 + Returns true if a given type matches the element's type exactly.
 	 ++/
 	@property
-	alias isTypeOf(Type) = Alias!(
-		__traits(compiles, {
-			static assert(is(typeof(GetMember!(QueryType, Name)) == Type));
-		})
-	);
+	enum isTypeOf(Type) = is(typeof(GetMember!(QueryType, Name)) == Type);
 
 	/++
 	 + Returns true if a given type can be assigned to a variable
 	 + of the element's type.
 	 ++/
 	@property
-	alias isTypeAssignableTo(Type) = Alias!(
-		__traits(compiles, {
-			typeof(GetMember!(QueryType, Name)) t1 = void;
-			Type t2 = t1;
-		})
-	);
+	enum isTypeAssignableTo(Type) = __traits(compiles, {
+		typeof(GetMember!(QueryType, Name)) t1 = void;
+		Type t2 = t1;
+	});
 
 	/++
 	 + Returns true if a given type can be assigned from a variable
 	 + of the element's type.
 	 ++/
 	@property
-	alias isTypeAssignableFrom(Type) = Alias!(
-		__traits(compiles, {
-			Type t1 = void;
-			typeof(GetMember!(QueryType, Name)) t2 = t1;
-		})
-	);
+	enum isTypeAssignableFrom(Type) = __traits(compiles, {
+		Type t1 = void;
+		typeof(GetMember!(QueryType, Name)) t2 = t1;
+	});
 
 	/++
 	 + Returns true if the element refers to a function.
 	 ++/
 	@property
-	alias isFunction = Alias!(
+	enum isFunction =
 		is(typeof(GetMember!(QueryType, Name)) == function) &&
-		!is(typeof(Overload) == typeof(null))
-	);
+		!is(typeof(Overload) == typeof(null));
 
 	/++
 	 + Returns true if the element refers to a constructor.
 	 ++/
 	@property
-	alias isConstructor = Alias!(
-		isFunction && isName!"__ctor"
-	);
+	enum isConstructor = isFunction && isName!"__ctor";
 
 	/++
 	 + Returns true if the element refers to a destructor.
 	 ++/
 	@property
-	alias isDestructor = Alias!(
-		isFunction && isName!"__dtor"
-	);
+	enum isDestructor = isFunction && isName!"__dtor";
 
 	/++
 	 + Return true if the element's arity matches the given number of parameters.
 	 ++/
 	@property
-	alias isArity(int Count) = Alias!(
-		isFunction && __traits(compiles, {
-			static assert(Overload.arity == Count);
-		})
-	);
+	enum isArity(int Count) = isFunction && __traits(compiles, {
+		static assert(Overload.arity == Count);
+	});
 
 	/++
 	 + Returns true if a given type matches the element's return type exactly.
 	 ++/
 	@property
-	alias isReturnTypeOf(Type) = Alias!(
-		isFunction && __traits(compiles, {
-			static assert(is(Overload.returnType == Type));
-		})
-	);
+	enum isReturnTypeOf(Type) = isFunction && is(Overload.returnType == Type);
 
 	/++
 	 + Returns true if a given type can be assigned to a variable of the
 	 + element's return type.
 	 ++/
 	@property
-	alias isReturnAssignableTo(Type) = Alias!(
-		isFunction && __traits(compiles, {
-			Overload.returnType t1 = void;
-			Type t2 = t1;
-		})
-	);
+	enum isReturnAssignableTo(Type) = isFunction && __traits(compiles, {
+		Overload.returnType t1 = void;
+		Type t2 = t1;
+	});
 
 	/++
 	 + Returns true if a given type can be assigned from a variable
 	 + of the element's return type.
 	 ++/
 	@property
-	alias isReturnAssignableFrom(Type) = Alias!(
-		isFunction && __traits(compiles, {
-			Type t1 = void;
-			Overload.returnType t2 = t1;
-		})
-	);
+	enum isReturnAssignableFrom(Type) = isFunction && __traits(compiles, {
+		Type t1 = void;
+		Overload.returnType t2 = t1;
+	});
 
 	/++
 	 + Returns true if the element's parameter types match the given type list.
 	 ++/
 	@property
-	alias isParameterTypesOf(TList...) = Alias!(
-		isFunction && __traits(compiles, {
-			static assert(Compare!(Overload.parameters).With!(TList));
-		})
-	);
+	enum isParameterTypesOf(TList...) = isFunction && __traits(compiles, {
+		static assert(Compare!(Overload.parameters).With!(TList));
+	});
 
 	/++
 	 + Returns true if the element refers to an aggregate type.
 	 ++/
 	@property
-	alias isAggregate = Alias!(
-		__traits(compiles, {
-			static assert(isAggregateType!(GetMember!(QueryType, Name)));
-		})
-	);
+	enum isAggregate = __traits(compiles, {
+		static assert(isAggregateType!(GetMember!(QueryType, Name)));
+	});
 
 	/++
 	 + Returns true if a given type matches the element's aggregate type exactly.
 	 ++/
 	@property
-	alias isAggregateTypeOf(Type) = Alias!(
-		__traits(compiles, {
-			static assert(is(GetMember!(QueryType, Name) == Type));
-		})
-	);
+	enum isAggregateTypeOf(Type) = isAggregate && is(GetMember!(QueryType, Name) == Type);
 
 	/++
 	 + Returns true if a given type can be assigned to a variable of the
 	 + element's aggregate type.
 	 ++/
 	@property
-	alias isAggregateAssignableTo(Type) = Alias!(
-		__traits(compiles, {
-			GetMember!(QueryType, Name) t1 = void;
-			Type t2 = t1;
-		})
-	);
+	enum isAggregateAssignableTo(Type) = isAggregate && __traits(compiles, {
+		GetMember!(QueryType, Name) t1 = void;
+		Type t2 = t1;
+	});
 
 	/++
 	 + Returns true if a given type can be assigned from a variable of the
 	 + element's aggregate type.
 	 ++/
 	@property
-	alias isAggregateAssignableFrom(Type) = Alias!(
-		__traits(compiles, {
-			Type t1 = void;
-			GetMember!(QueryType, Name) t2 = t1;
-		})
-	);
+	enum isAggregateAssignableFrom(Type) = isAggregate && __traits(compiles, {
+		Type t1 = void;
+		GetMember!(QueryType, Name) t2 = t1;
+	});
 
 	/++
 	 + Returns true if the element refers to a class.
 	 ++/
 	@property
-	alias isClass = Alias!(
-		__traits(compiles, {
-			alias Element = Alias!(GetMember!(QueryType, Name));
-			static assert(is(Element == class));
-		})
-	);
+	enum isClass = isAggregate && __traits(compiles, {
+		alias Element = Alias!(GetMember!(QueryType, Name));
+		static assert(is(Element == class));
+	});
 
 	/++
 	 + Returns true if the element refers to a struct.
 	 ++/
 	@property
-	alias isStruct = Alias!(
-		__traits(compiles, {
-			alias Element = Alias!(GetMember!(QueryType, Name));
-			static assert(is(Element == struct));
-		})
-	);
+	enum isStruct = isAggregate && __traits(compiles, {
+		alias Element = Alias!(GetMember!(QueryType, Name));
+		static assert(is(Element == struct));
+	});
 
 	/++
 	 + Returns true is the element is a template of the given type.
 	 ++/
 	@property
-	alias isTemplateOf(alias Template) = Alias!(
-		__traits(compiles, {
-			alias Element = Alias!(GetMember!(QueryType, Name));
-			static assert(is(TemplateOf!Element == Template));
-		})
-	);
+	enum isTemplateOf(alias Template) = __traits(compiles, {
+		alias Element = Alias!(GetMember!(QueryType, Name));
+		static assert(is(TemplateOf!Element == Template));
+	});
 
 	/++
 	 + Returns true if the element's template arguments match.
 	 ++/
 	@property
-	alias isTemplateArgsOf(TemplateArgs...) = Alias!(
-		__traits(compiles, {
-			alias Element = Alias!(GetMember!(QueryType, Name));
-			static assert(Compare!(TemplateArgsOf!Element).With!TemplateArgs);
-		})
-	);
+	enum isTemplateArgsOf(TemplateArgs...) = __traits(compiles, {
+		alias Element = Alias!(GetMember!(QueryType, Name));
+		static assert(Compare!(TemplateArgsOf!Element).With!TemplateArgs);
+	});
 
 	/++
 	 + Returns an uninitialized value of the element's type.
@@ -325,17 +294,26 @@ struct DQueryElement(QueryType, string Name, alias Overload = null)
 	@property
 	static auto attributes()()
 	{
-		alias MapToAttribute(alias Attribute) = Alias!(
-			DQueryAttribute!Attribute()
-		);
+		static if(accessible)
+		{
+			alias MapToAttribute(alias Attribute) = Alias!(
+				DQueryAttribute!Attribute()
+			);
 
-		return DQueryAttributes!(
-			QueryType,
-			staticMap!(
-				MapToAttribute,
-				GetAttributes!(QueryType, Name)
-			)
-		)();
+			return DQueryAttributes!(
+				QueryType,
+				staticMap!(
+					MapToAttribute,
+					GetAttributes!(QueryType, Name)
+				)
+			)();
+		}
+		else
+		{
+			return DQueryAttributes!(
+				QueryType, TypeTuple!()
+			)();
+		}
 	}
  
 	/++
@@ -348,7 +326,10 @@ struct DQueryElement(QueryType, string Name, alias Overload = null)
 		return attributes.allow!Allow;
 	}
 
-	string toString()
+	/++
+	 + Returns the name of element.
+	 ++/
+	static string toString()
 	{
 		return Name;
 	}
