@@ -248,3 +248,8 @@ Limitations
 -----------
 
 Because of how traits are setup in D, dquery can't operate on private or protected types, fields, or functions. Querying a type will only produce its public members.
+
+License
+-------
+
+MIT
