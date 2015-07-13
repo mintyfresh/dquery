@@ -27,21 +27,19 @@ struct DQueryAttributes(QueryType, Attributes...)
 	 + Returns true if the list of attributes is empty.
 	 ++/
 	@property
-	alias empty = Alias!(length == 0);
+	enum empty = length == 0;
 
 	/++
 	 + Returns the number of attributes in the query.
 	 ++/
 	@property
-	alias length = Alias!(Attributes.length);
+	enum length = Attributes.length;
 
 	/++
 	 + Returns a transformed list of attributes with all duplicateds removed.
 	 ++/
 	@property
-	alias unique = Alias!(
-		DQueryAttributes!(QueryType, NoDuplicates!Attributes)()
-	);
+	enum unique = DQueryAttributes!(QueryType, NoDuplicates!Attributes)();
 
 	/++
 	 + Returns an uninitialized value of the query's type.

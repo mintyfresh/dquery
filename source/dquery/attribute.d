@@ -22,17 +22,13 @@ struct DQueryAttribute(alias Attribute)
 	 + Proprety that returns true if the attribute is a type.
 	 ++/
 	@property
-	alias isType = Alias!(
-		!is(typeof(Attribute))
-	);
+	enum isType = !is(typeof(Attribute));
 
 	/++
 	 + Property that returns true if the attribute is an expression.
 	 ++/
 	@property
-	alias isExpression = Alias!(
-		is(typeof(Attribute))
-	);
+	enum isExpression = is(typeof(Attribute));
 
 	// Determine how to get the type.
 	static if(isExpression)
@@ -76,33 +72,27 @@ struct DQueryAttribute(alias Attribute)
 	 + type exactly.
 	 ++/
 	@property
-	alias isTypeOf(Type) = Alias!(
-		is(type == Type)
-	);
+	enum isTypeOf(Type) = is(type == Type);
 
 	/++
 	 + Property that returns true if a given type can be assigned to a
 	 + variable of the attribute's type.
 	 ++/
 	@property
-	alias isTypeAssignableTo(Type) = Alias!(
-		__traits(compiles, {
-			type t1 = void;
-			Type t2 = t1;
-		})
-	);
+	enum isTypeAssignableTo(Type) = __traits(compiles, {
+		type t1 = void;
+		Type t2 = t1;
+	});
 
 	/++
 	 + Property that returns true if a given type can be assigned from a
 	 + variable of the attribute's type.
 	 ++/
 	@property
-	alias isTypeAssignableFrom(Type) = Alias!(
-		__traits(compiles, {
-			Type t1 = void;
-			type t2 = t1;
-		})
-	);
+	enum isTypeAssignableFrom(Type) = __traits(compiles, {
+		Type t1 = void;
+		type t2 = t1;
+	});
 
 	@property
 	static auto opCall()
@@ -118,7 +108,7 @@ struct DQueryAttribute(alias Attribute)
 		return query!type;
 	}
 
-	string toString()
+	static string toString()
 	{
 		return Attribute.stringof;
 	}
