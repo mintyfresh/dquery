@@ -237,7 +237,7 @@ foreach(element; elements)
     foreach(attribute; element.attributes!Column)
     {
         // Get value of attribute, or use a fallback if it's a type.
-        Column column = attribute.value!(Column(element.name));
+        Column column = attribute.valueOr!(Column(element.name));
 
         // . . .
     }
