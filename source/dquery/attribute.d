@@ -13,12 +13,6 @@ struct DQueryAttribute(alias Attribute)
 	alias attribute = Attribute;
 
 	/++
-	 + Property that returns the value of the attribute.
-	 ++/
-	@property
-	alias get = Attribute;
-
-	/++
 	 + Proprety that returns true if the attribute is a type.
 	 ++/
 	@property
@@ -40,17 +34,28 @@ struct DQueryAttribute(alias Attribute)
 		alias type = typeof(Attribute);
 
 		/++
-		 + Property that return the value of the attributes.
+		 + Property that returns the value of the attributes.
 		 + Only defined for attributes that can produce a value.
 		 ++/
 		@property
-		alias value = Attribute;
+		alias get = Attribute;
 
 		/++
-		 + Property that returns the value of the attribute, or a default.
+		 + Property that returns the value of the attribute if it's an expression,
+		 + else a default value if the attribute if a type.
 		 ++/
 		@property
-		alias valueOr(alias Default) = Attribute;
+		alias getOrElse(alias Default) = Attribute;
+
+		/++
+		 + Property that returns the value of the attribute if it's an expression,
+		 + else throws an exception (at runtime) if it's a type.
+		 ++/
+		@property
+		static type getOrThrow(ExcType = Exception)(string message)
+		{
+			return Attribute;
+		}
 	}
 	else
 	{
@@ -61,10 +66,21 @@ struct DQueryAttribute(alias Attribute)
 		alias type = Attribute;
 
 		/++
-		 + Property that returns the value of the attribute, or a default.
+		 + Property that returns the value of the attribute if it's an expression,
+		 + else a default value if the attribute if a type.
 		 ++/
 		@property
-		alias valueOr(alias Default) = Default;
+		alias getOrElse(alias Default) = Default;
+
+		/++
+		 + Property that returns the value of the attribute if it's an expression,
+		 + else throws an exception (at runtime) if it's a type.
+		 ++/
+		@property
+		static type getOrThrow(ExcType = Exception)(string message)
+		{
+			throw new ExcType(message);
+		}
 	}
 
 	/++
@@ -101,6 +117,9 @@ struct DQueryAttribute(alias Attribute)
 		return attribute;
 	}
 
+	/++
+	 + Queries the type of the attribute.
+	 ++/
 	@property
 	static auto query()()
 	{
