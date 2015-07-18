@@ -61,6 +61,92 @@ auto destructors = query!User.destructors;
 auto aggregates = query!User.aggregates;
 ```
 
+You also get a number of filters for common information about elements of a types, such as filters for names, types, return types, arity, parameter lists, etc.
+
+```
+    query!Type
+
+        // Filter only names,
+        .names!("foo", "bar")
+
+        // Filter types,
+        .types!(int, string, bool)
+
+        // Filter return types,
+        .returns!(int, string, bool)
+
+        // Filter accessible elements,
+        .accessible
+
+        // Filter arities,
+        .arities!(0, 1, 2)
+
+        // Filter functions that take (int, string, bool),
+        .parameters!(int, string, bool)
+
+        // Filter elements that have @A and @B and @C,
+        .allOf!(A, B, C)
+
+        // Filter elements that have @A or @B or @C,
+        .anyOf!(A, B, C)
+
+        // Filter elements that don't have @A or @B or @C,
+        .noneOf!(A, B, C);
+```
+
+### Simple Attribute Information
+
+Easily check for attributes on any type or element.
+
+```d
+auto userQuery = query!User;
+
+// True if type User has @A and @B and @C.
+bool hasAll = userQuery.hasAllOf!(A, B, C);
+
+// True if type User has @A or @B or @C.
+bool hasAny = userQuery.hasAnyOf!(A, B, C); 
+
+// True if type User has none of @A or @B or @C.
+bool hasNone = userQuery.hasNoneOf!(A, B, C);
+
+// Returns attributes attached to the User type.
+auto attributes = query!User.attributes;
+```
+
+### Transformations
+
+dquery includes a `filter!()` for custom or advanced filtering in chains.
+
+```d
+auto elements =
+    query!User
+
+        // Custom filter.
+        .filter!(element =>
+            element.isTypeOf!string ||
+            element.hasAttribute!Id
+        );
+```
+
+dquery also includes a `map!()` transform function for transforming the result of a chain.
+
+```d
+string[] names =
+    query!User
+
+        // Filter fields,
+        .fields
+
+        // That have @Id or @Column,
+        .anyOf!(Id, Column)
+
+        // Map to their names.
+        .map!(field => field.name);
+```
+
+All dquery transform functions can take a function or delegate, or a template.
+
 ### Simple Validations
 
 dquery also provides simple functions to perform validations without breaking chains.
@@ -155,39 +241,6 @@ auto elements =
         .reset;
 ```
 
-### Transformations
-
-dquery includes a `filter!()` for custom or advanced filtering in chains.
-
-```d
-auto elements =
-    query!User
-
-        // Custom filter.
-        .filter!(element =>
-            element.isTypeOf!string ||
-            element.hasAttribute!Id
-        );
-```
-
-dquery also includes a `map!()` transform function for transforming the result of a chain.
-
-```d
-string[] names =
-    query!User
-
-        // Filter fields,
-        .fields
-
-        // That have @Id or @Column,
-        .anyOf!(Id, Column)
-
-        // Map to their names.
-        .map!(field => field.name);
-```
-
-All dquery transform functions can take a function or delegate, or a template.
-
 ### Joining Results
 
 Mutliple chains can be joined together to produce even more complex queries easily.
@@ -237,12 +290,14 @@ foreach(element; elements)
     foreach(attribute; element.attributes!Column)
     {
         // Get value of attribute, or use a fallback if it's a type.
-        Column column = attribute.valueOr!(Column(element.name));
+        Column column = attribute.getOrElse!(Column(element.name));
 
         // . . .
     }
 }
 ```
+
+In addition to `getOrElse!(Default)`, attributes provide a `get` method (defined only for expressions), and a `getOrThrow!(Exception)` which throws an exception at runtime if the attribute is not an expression.
 
 Limitations
 -----------
