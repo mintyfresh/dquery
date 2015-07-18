@@ -66,8 +66,8 @@ struct DQueryAttributes(QueryType, Attributes...)
 	 ++/
 	@property
 	static auto first()()
-	if(!empty)
 	{
+		static assert(!empty, "Attributes query is empty.");
 		return Attributes[0];
 	}
 
