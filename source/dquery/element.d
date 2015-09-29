@@ -240,6 +240,16 @@ struct DQueryElement(QueryType, string Name, alias Overload = null)
 	});
 
 	/++
+	 + Returns true if the element refers to an enum.
+	 ++/
+	@property
+	enum isEnum = isAggregate && __traits(compiles, {
+		alias Element = Alias!(GetMember!(QueryType, Name));
+		static assert(is(Element == enum));
+
+	});
+
+	/++
 	 + Returns true is the element is a template of the given type.
 	 ++/
 	@property
