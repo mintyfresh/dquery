@@ -78,13 +78,40 @@ struct DQueryAttributes(QueryType, Attributes...)
 	static auto firstOr(alias Fallback)()
 	if(!is(typeof(Fallback) == void))
 	{
+		// Deprecate in a future version.
+		return firstOrElse!Fallback;
+	}
+
+	/++
+	 + Returns the first attribute in the query, or a fallback if empty.
+	 ++/
+	@property
+	static auto firstOrElse(alias Fallback)()
+	if(!is(typeof(Fallback) == void))
+	{
 		static if(!empty)
 		{
 			return Attributes[0];
 		}
 		else
 		{
-			return DQueryAttribute!Fallback;
+			return DQueryAttribute!Fallback();
+		}
+	}
+
+	/++
+	 + Returns the first attribute in the query, or throw if empty.
+	 ++/
+	@property
+	static auto firstOrThrow()(lazy Throwable t)
+	{
+		static if(!empty)
+		{
+			return Attributes[0];
+		}
+		else
+		{
+			throw t;
 		}
 	}
 
