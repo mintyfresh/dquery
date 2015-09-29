@@ -17,7 +17,7 @@ public import dquery.query;
  + Returns:
  +     A query over the supplied type.
  ++/
-auto query(QueryType)()
+auto query(QueryType, bool Safe = false)()
 {
 	template MapToElement(string Name)
 	{
@@ -43,8 +43,20 @@ auto query(QueryType)()
 		}
 	}
 
+	template SafeMap(string Name)
+	{
+		static if(__traits(compiles, MapToElement!Name) || Safe)
+		{
+			alias SafeMap = MapToElement!Name;
+		}
+		else
+		{
+			alias SafeMap = TypeTuple!();
+		}
+	}
+
 	enum Elements = __traits(allMembers, QueryType);
-	return DQuery!(QueryType, staticMap!(MapToElement, Elements))();
+	return DQuery!(QueryType, staticMap!(SafeMap, Elements))();
 }
 
 /++
