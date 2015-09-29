@@ -84,7 +84,7 @@ struct DQueryAttributes(QueryType, Attributes...)
 		}
 		else
 		{
-			return Fallback;
+			return DQueryAttribute!Fallback;
 		}
 	}
 
